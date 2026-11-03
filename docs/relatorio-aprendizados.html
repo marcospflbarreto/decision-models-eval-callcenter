@@ -1,0 +1,422 @@
+<title>Laya no Call Center Bancário</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: relatório técnico de coluna única (~72ch), com faixas de achados e gráficos de intervalo de confiança na escala 0–100%. */
+:root {
+  --bg: #f6f7fa;
+  --surface: #ffffff;
+  --ink: #18202e;
+  --muted: #5a6478;
+  --line: #dde1ea;
+  --laya: #3446c8;
+  --laya-soft: #e6e9fb;
+  --tfidf: #b06d12;
+  --tfidf-soft: #f8ecd9;
+  --base: #8a93a6;
+  --good: #1d7a4c;
+  --good-soft: #dff2e8;
+  --bad: #b3362b;
+  --bad-soft: #f9e2df;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151d; --surface: #181e29; --ink: #e6e9f0; --muted: #9aa3b5; --line: #2b3342;
+    --laya: #8b98f5; --laya-soft: #232b52; --tfidf: #e3a650; --tfidf-soft: #3a2c17; --base: #7d869a;
+    --good: #5cc48f; --good-soft: #17352a; --bad: #f08479; --bad-soft: #3d1f1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151d; --surface: #181e29; --ink: #e6e9f0; --muted: #9aa3b5; --line: #2b3342;
+  --laya: #8b98f5; --laya-soft: #232b52; --tfidf: #e3a650; --tfidf-soft: #3a2c17; --base: #7d869a;
+  --good: #5cc48f; --good-soft: #17352a; --bad: #f08479; --bad-soft: #3d1f1c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16.5px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 820px; margin: 0 auto; padding-block: 48px 80px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--laya); }
+a:focus-visible { outline: 2px solid var(--laya); outline-offset: 2px; border-radius: 2px; }
+section { display: grid; gap: 18px; min-width: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.15rem; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--muted); font-family: var(--font-mono); }
+header { display: grid; gap: 16px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+nav.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+nav.toc a { font-size: 0.85rem; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; background: var(--surface); }
+nav.toc a:hover { border-color: var(--laya); }
+
+/* Achados principais */
+.findings { display: grid; gap: 0; border-top: 2px solid var(--ink); }
+.finding { display: grid; grid-template-columns: 10.5rem 1fr; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.finding .num { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; white-space: nowrap; line-height: 1; font-variant-numeric: tabular-nums; }
+.finding .num small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.7rem; color: var(--muted); margin-top: 6px; letter-spacing: 0.04em; }
+.finding p { min-width: 0; }
+@media (max-width: 560px) { .finding { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Pipeline */
+.pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; counter-reset: step; }
+.step { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+.step::before { counter-increment: step; content: "Etapa " counter(step); font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.step b { font-family: var(--font-display); font-size: 0.98rem; }
+.step span { font-size: 0.86rem; color: var(--muted); line-height: 1.45; }
+
+/* Tabelas */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-family: var(--font-mono); font-weight: 500; font-size: 0.74rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td.n { text-align: right; font-family: var(--font-mono); }
+th.n { text-align: right; }
+.ci { color: var(--muted); font-size: 0.8em; }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; padding: 1px 8px; border-radius: 999px; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.neutral { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+
+/* Gráficos de IC */
+figure { margin: 0; display: grid; gap: 10px; min-width: 0; }
+figcaption { font-size: 0.85rem; color: var(--muted); max-width: 68ch; }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 8px 6px; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.chart text { font-family: var(--font-body); fill: var(--ink); font-size: 12px; }
+.chart .axis text { fill: var(--muted); font-family: var(--font-mono); font-size: 10.5px; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.84rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+
+/* Matrizes de confusão */
+.matrices { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.matrix { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.matrix h3 { font-size: 0.95rem; }
+.grid4 { display: grid; grid-template-columns: 5.8rem repeat(4, 1fr); gap: 3px; font-variant-numeric: tabular-nums; font-size: 0.82rem; }
+.grid4 .h { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); text-align: center; align-self: end; padding-bottom: 2px; }
+.grid4 .r { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); align-self: center; }
+.grid4 .c { text-align: center; padding: 7px 0; border-radius: 4px; font-family: var(--font-mono); }
+
+.callout { border-left: 3px solid var(--laya); background: var(--surface); padding: 14px 18px; border-radius: 0 8px 8px 0; display: grid; gap: 6px; }
+.callout.warn { border-left-color: var(--bad); }
+.callout b { font-family: var(--font-display); }
+ul.clean { margin: 0; padding-left: 1.15rem; display: grid; gap: 8px; max-width: 68ch; }
+ul.clean li::marker { color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.card h3 { font-size: 1rem; }
+.card p, .card li { font-size: 0.93rem; }
+ol.next { margin: 0; padding: 0; list-style: none; display: grid; gap: 12px; counter-reset: n; }
+ol.next li { display: grid; grid-template-columns: 2rem 1fr; gap: 12px; align-items: start; }
+ol.next li::before { counter-increment: n; content: counter(n); font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: var(--laya); line-height: 1.3; }
+ol.next li > div { display: grid; gap: 2px; min-width: 0; }
+pre { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.6; }
+footer { font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="page">
+
+<header>
+  <div class="eyebrow">Relatório de estudo · Decision models</div>
+  <h1>Laya no call center bancário: o que aprendemos até agora</h1>
+  <p class="lede">Treinamos um decision model aberto (Laya) para classificar ligações de um call center bancário por assunto, sub-assunto e criticidade, usando apenas conversas sintéticas. Este relatório resume o que funcionou, o que os números realmente dizem e o que falta para comparar com o Jev.</p>
+  <div class="meta"><span>30 out 2026</span><span>Dados 100% sintéticos (Banco Meridiano, fictício)</span><span>Hardware: Mac M5 Max, 64 GB</span></div>
+  <nav class="toc" aria-label="Seções">
+    <a href="#resumo">Resumo</a><a href="#problema">Problema</a><a href="#metodo">Método</a><a href="#dados">Dados</a><a href="#resultado-1">Teste 1</a><a href="#resultado-2">Teste 2</a><a href="#licoes">Lições</a><a href="#limitacoes">Limitações</a><a href="#proximos">Próximos passos</a>
+  </nav>
+</header>
+
+<section id="resumo">
+  <div class="eyebrow">Resumo</div>
+  <h2>Cinco achados</h2>
+  <div class="findings">
+    <div class="finding"><div class="num">23% → 100%<small>SUB-ASSUNTO, BASE → FINE-TUNED</small></div><p>O fine-tuning funciona: o Laya multilíngue sem treino quase chuta (23% no sub-assunto); depois de ~80 min de treino em um Mac, acerta 100% no teste com cenários conhecidos.</p></div>
+    <div class="finding"><div class="num">99%<small>TF-IDF NO MESMO TESTE</small></div><p>Um modelo simples de palavras-chave (TF-IDF + regressão logística) chega ao mesmo resultado. O primeiro teste era fácil demais: o texto sintético entrega o rótulo pelo vocabulário. Sem esse baseline, teríamos concluído errado.</p></div>
+    <div class="finding"><div class="num">84%<small>SUB-ASSUNTO EM CENÁRIOS NOVOS</small></div><p>Em situações que nunca viu no treino, o Laya cai para 84% (média de 3 seeds) e empata com o TF-IDF (82%). Esse é o número honesto de generalização hoje.</p></div>
+    <div class="finding"><div class="num">70% vs 82%<small>CRITICIDADE, LAYA vs TF-IDF</small></div><p>A criticidade é o ponto fraco do Laya: confunde normal com importante e rebaixa casos graves (recall de grave/BACEN 76% contra 93%). As diferenças ainda não são estatisticamente significativas.</p></div>
+    <div class="finding"><div class="num">539<small>CONVERSAS DE TREINO</small></div><p>O gargalo é volume: um encoder de 322M parâmetros com 539 exemplos e uma calibração ajustada em só 49 itens. O pipeline para gerar 30 mil conversas está pronto e é retomável.</p></div>
+  </div>
+</section>
+
+<section id="problema">
+  <div class="eyebrow">Problema</div>
+  <h2>O que queremos responder</h2>
+  <p>Cada ligação recebe quatro respostas, cada uma uma pergunta tipada do Laya, respondida numa única passada do modelo e com confiança calibrada:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Pergunta</th><th>Tipo Laya</th><th>Valores</th></tr></thead>
+    <tbody>
+      <tr><td>Assunto</td><td class="mono">choice</td><td>Cartões e limite · Faturas e cobrança · Conta e Pix · Empréstimos e financiamentos</td></tr>
+      <tr><td>Sub-assunto</td><td class="mono">choice</td><td>13 opções, perguntadas só dentro do assunto previsto (2 passos)</td></tr>
+      <tr><td>Criticidade</td><td class="mono">score</td><td>normal &lt; importante &lt; grave &lt; BACEN</td></tr>
+      <tr><td>Risco BACEN</td><td class="mono">noul</td><td>Probabilidade de reclamação formal ou direito regulatório negado</td></tr>
+    </tbody>
+  </table></div>
+  <ul class="clean">
+    <li><b>RQ1.</b> Um Laya fine-tuned atinge a qualidade do Jev (benchmark atual) em sub-assunto e detecção de BACEN?</li>
+    <li><b>RQ2.</b> Dados 100% sintéticos bastam para treinar, enquanto não há transcrições reais?</li>
+    <li><b>RQ3.</b> A confiança do modelo é calibrada o bastante para abster-se e mandar casos para revisão humana?</li>
+  </ul>
+  <p>Por que Laya: é aberto (Apache 2.0), roda em contêiner próprio e responde em ~50 ms por ligação. O Jev é fechado e só existe como API.</p>
+</section>
+
+<section id="metodo">
+  <div class="eyebrow">Método</div>
+  <h2>Como montamos o experimento</h2>
+  <div class="pipeline">
+    <div class="step"><b>Especificar</b><span>Sorteia sub-assunto, criticidade, cenário, perfil de cliente e atendente, ruído de transcrição. O rótulo nasce aqui, por construção.</span></div>
+    <div class="step"><b>Gerar</b><span>Um LLM local (gemma4:12b via Ollama) escreve a conversa a partir da especificação, com regras contra vazamento do rótulo.</span></div>
+    <div class="step"><b>Verificar às cegas</b><span>Outro LLM (qwen3.8:27b) classifica sem ver o rótulo. Descartamos onde os dois discordam.</span></div>
+    <div class="step"><b>Separar</b><span>Remove quase-duplicatas e divide em treino, calibração e teste por hash, estável entre rodadas.</span></div>
+    <div class="step"><b>Treinar</b><span>Fine-tuning do laya-multilingual (322M) no Mac, 4 épocas, ~80 min por execução.</span></div>
+    <div class="step"><b>Avaliar</b><span>Predições por item, IC 95%, McNemar pareado contra baseline, várias seeds.</span></div>
+  </div>
+  <p>O diagrama executivo do treinamento está em <a href="https://claude.ai/artifact/P1SaaNmWKsxgvmhT8psE22">Treinamento do Laya</a>. A avaliação segue os ACM SIGSOFT Empirical Standards (Data Science e Benchmarking): baseline simples, intervalos de confiança, teste pareado com correção de Holm, variação entre seeds, predições brutas guardadas e metadados de execução (versões, hashes dos dados, digest dos modelos).</p>
+</section>
+
+<section id="dados">
+  <div class="eyebrow">Dados</div>
+  <h2>867 conversas geradas, 777 aprovadas</h2>
+  <p>A primeira tentativa de geração produzia rótulos incoerentes: o juiz concordava com só ~50% das criticidades (um golpe de Pix rotulado "normal", por exemplo). Três correções resolveram:</p>
+  <ul class="clean">
+    <li>cada cenário declara em quais níveis de criticidade faz sentido;</li>
+    <li>o prompt explica o nível-alvo e o que o separa dos vizinhos;</li>
+    <li>a taxonomia v2 tornou disjuntas definições que se sobrepunham (cobrança errada na fatura ≠ tarifa na conta; limite ≠ bloqueio; cobrança errada sozinha não é BACEN).</li>
+  </ul>
+  <div class="two">
+    <div class="card">
+      <h3>Verificação cega (taxonomia v2)</h3>
+      <div class="table-wrap"><table><tbody>
+        <tr><td>Sub-assunto concorda</td><td class="n">92%</td></tr>
+        <tr><td>Criticidade exata concorda</td><td class="n">75%</td></tr>
+        <tr><td>Mantidas pelo filtro</td><td class="n">90%</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="card">
+      <h3>Velocidade de geração</h3>
+      <div class="table-wrap"><table><tbody>
+        <tr><td>Ollama padrão, modelo 27B</td><td class="n">~15 dias / 30k</td></tr>
+        <tr><td>gemma4:12b, 16 em paralelo</td><td class="n">~2 dias / 30k</td></tr>
+        <tr><td>Taxa medida</td><td class="n">570–660 conversas/h</td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
+  <figure>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Criticidade</th><th class="n">Conversas</th><th class="n">%</th><th>Distribuição</th></tr></thead>
+      <tbody id="dist"></tbody>
+    </table></div>
+    <figcaption>Distribuição das 777 conversas aprovadas. As proporções-alvo (45 / 30 / 17 / 8%) foram escolhidas por nós, não medidas em dados reais. Isso é uma limitação.</figcaption>
+  </figure>
+</section>
+
+<section id="resultado-1">
+  <div class="eyebrow">Teste 1 · cenários conhecidos</div>
+  <h2>O fine-tuning funciona, mas o teste não distingue os modelos</h2>
+  <p>75 conversas de teste, nunca vistas no treino, mas geradas a partir dos mesmos cenários. Pontos são a estimativa, barras o intervalo de confiança de 95% (Wilson).</p>
+  <figure>
+    <div class="legend"><span><i style="background:var(--laya)"></i>Laya fine-tuned (v1)</span><span><i style="background:var(--tfidf)"></i>TF-IDF + regressão logística</span><span><i style="background:var(--base)"></i>Laya base, sem treino</span></div>
+    <div class="chart" id="chart1" role="img" aria-label="Intervalos de confiança das métricas no teste com cenários conhecidos"></div>
+    <figcaption>Laya fine-tuned vs base: diferença significativa em todas as métricas (McNemar, p &lt; 10⁻⁹). Laya vs TF-IDF: nenhuma diferença significativa. Com apenas 4 casos BACEN, "100% de recall" tem intervalo de 51% a 100%.</figcaption>
+  </figure>
+</section>
+
+<section id="resultado-2">
+  <div class="eyebrow">Teste 2 · cenários novos</div>
+  <h2>Em situações nunca vistas, o Laya generaliza melhor no assunto e pior na criticidade</h2>
+  <p>Para medir generalização, um cenário inteiro de cada sub-assunto ficou só no teste (238 conversas, 14 BACEN). Treinamos o Laya três vezes, com seeds diferentes, para medir a variação entre execuções.</p>
+  <figure>
+    <div class="legend"><span><i style="background:var(--laya)"></i>Laya (média de 3 seeds; barra = menor e maior limite dos ICs)</span><span><i style="background:var(--tfidf)"></i>TF-IDF</span></div>
+    <div class="chart" id="chart2" role="img" aria-label="Intervalos de confiança das métricas no teste com cenários novos"></div>
+  </figure>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Comparação pareada</th><th class="n">Diferença Laya − TF-IDF</th><th class="n">IC 95%</th><th class="n">p (Holm)</th><th>Leitura</th></tr></thead>
+    <tbody>
+      <tr><td>Assunto</td><td class="n">+6 p.p.</td><td class="n">[+1, +11]</td><td class="n">0,06</td><td><span class="pill neutral">tendência a favor do Laya</span></td></tr>
+      <tr><td>Sub-assunto (2 passos)</td><td class="n">+3 p.p.</td><td class="n">[−5, +9]</td><td class="n">1,0</td><td><span class="pill neutral">empate</span></td></tr>
+      <tr><td>Criticidade exata</td><td class="n">−12 p.p.</td><td class="n">[−20, −6]</td><td class="n">0,054</td><td><span class="pill neutral">tendência a favor do TF-IDF</span></td></tr>
+      <tr><td>Decisão BACEN</td><td class="n">0</td><td class="n">[0, 0]</td><td class="n">1,0</td><td><span class="pill neutral">empate (ambos acertam os 14)</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Onde cada modelo erra</h3>
+  <p>Acerto de sub-assunto por tópico no teste de cenários novos. Cada tópico tem só 6 a 31 conversas, então trate como indicativo, não como conclusão.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Sub-assunto (cenário novo)</th><th class="n">n</th><th class="n">Laya</th><th class="n">TF-IDF</th><th>Diferença</th></tr></thead>
+    <tbody id="persub"></tbody>
+  </table></div>
+
+  <h3>Criticidade: para onde vão os erros</h3>
+  <div class="matrices">
+    <div class="matrix"><h3>Laya (média de 3 seeds, arredondada)</h3><div class="grid4" id="m-laya"></div></div>
+    <div class="matrix"><h3>TF-IDF</h3><div class="grid4" id="m-tfidf"></div></div>
+  </div>
+  <p>Linhas são o rótulo verdadeiro; colunas, a previsão. O Laya erra principalmente entre normal e importante e rebaixa ~9 de 29 casos graves para importante. O TF-IDF capta melhor as pistas de gravidade, que no texto sintético são bem lexicais ("segundo contato", "prazo", "Procon"). BACEN é detectado quase perfeitamente pelos dois.</p>
+</section>
+
+<section id="licoes">
+  <div class="eyebrow">Lições</div>
+  <h2>O que levamos deste ciclo</h2>
+  <div class="two">
+    <div class="card"><h3>Sempre ter um baseline simples</h3><p>Sem o TF-IDF, o 100% do primeiro teste pareceria uma vitória do Laya. Um modelo de 3 ms por conversa mostrou que o teste era fácil.</p></div>
+    <div class="card"><h3>Testar fora da distribuição do treino</h3><p>Separar cenários inteiros derrubou o resultado de 100% para 84% e revelou a diferença real entre os modelos.</p></div>
+    <div class="card"><h3>Intervalos antes de conclusões</h3><p>Com 4 casos BACEN, 100% de recall não diz nada. Toda métrica agora sai com IC 95%, e comparações usam teste pareado.</p></div>
+    <div class="card"><h3>Dado sintético precisa de juiz</h3><p>Rótulo por construção não garante que o texto corresponda. O juiz cego e a taxonomia com definições disjuntas levaram a concordância de ~50% para 75–92%.</p></div>
+    <div class="card"><h3>Calibração precisa de volume</h3><p>Com 49 itens de calibração, a temperatura bateu no limite em todas as seeds. O ECE do assunto é ótimo (0,03), mas o da criticidade (0,23) ainda não serve para abstenção.</p></div>
+    <div class="card"><h3>Laya roda bem em hardware comum</h3><p>Treino de ~80 min e inferência de ~50 ms por ligação num notebook, com modelo aberto. A arquitetura conteinerizada é viável.</p></div>
+  </div>
+</section>
+
+<section id="limitacoes">
+  <div class="eyebrow">Limitações</div>
+  <h2>Ameaças à validade</h2>
+  <div class="callout warn"><b>Nenhum número aqui vale para ligações reais.</b><p>Todos os resultados medem quanto o modelo aprendeu a distribuição sintética. A comparação com o Jev só é válida em um conjunto gold de conversas reais anonimizadas.</p></div>
+  <ul class="clean">
+    <li><b>Construto:</b> o ruído de transcrição é simulado; ligações reais têm interrupções, silêncios e erros de ASR que o LLM não reproduz.</li>
+    <li><b>Interna:</b> gerador e juiz são LLMs e podem compartilhar vieses; o filtro do juiz remove casos ambíguos e pode facilitar o teste.</li>
+    <li><b>Externa:</b> um banco fictício, 47 cenários e uma distribuição de criticidade escolhida por nós.</li>
+    <li><b>Conclusão:</b> amostras pequenas (75 e 238 conversas de teste; 4 e 14 BACEN) e só 3 seeds. Nenhuma diferença Laya × TF-IDF é significativa.</li>
+    <li><b>Benchmark:</b> o Jev ainda não foi avaliado.</li>
+  </ul>
+</section>
+
+<section id="proximos">
+  <div class="eyebrow">Próximos passos</div>
+  <h2>O que fazer a seguir</h2>
+  <ol class="next">
+    <li><div><b>Gerar mais dados</b><span>Rodadas incrementais até 30 mil conversas (~2 dias de máquina). Mais cenários por sub-assunto, já que variedade é o gargalo.</span></div></li>
+    <li><div><b>Montar um conjunto gold real</b><span>Recorte de reclamações bancárias do corpus aberto ConsumerBR (Consumidor.gov.br), anotado por 2 pessoas com medida de concordância (κ). É o primeiro teste em texto real.</span></div></li>
+    <li><div><b>Basear as proporções em dados oficiais</b><span>Usar o ranking de reclamações do Banco Central e os dados abertos do Consumidor.gov.br para definir a frequência de cada assunto e de BACEN.</span></div></li>
+    <li><div><b>Avaliar o Jev no mesmo protocolo</b><span>Mesmas perguntas, mesmas conversas, mesmo formato de predições; comparação pareada com IC.</span></div></li>
+    <li><div><b>Escrever o protocolo antes da rodada final</b><span>Fixar perguntas de pesquisa, métricas e análise antes de rodar o gold set, para que o resultado não seja ajustado depois de visto.</span></div></li>
+  </ol>
+</section>
+
+<section id="reproduzir">
+  <div class="eyebrow">Reprodução</div>
+  <h2>Como rodar</h2>
+  <pre>uv sync                                                 # dependências Python
+ollama pull gemma4:12b                                  # gerador
+ollama pull qwen3.8:27b                                 # juiz cego
+scripts/ollama-fast.sh                                  # em outro terminal: Ollama na porta 11435
+
+uv run callsim-generate --n 30000 --max-minutes 60      # geração incremental (gemma4:12b)
+uv run callsim-verify                                   # juiz cego (qwen3.8:27b)
+uv run callsim-dataset --filtrar --split-por cenario --out data/splits-cenario
+scripts/train-seeds.sh data/splits-cenario 0 1 2        # treino + avaliação por seed
+uv run callsim-compare 'logs/eval/splits-cenario-test/laya-splits-cenario-s*' \
+                       logs/eval/splits-cenario-test/tfidf-logreg</pre>
+</section>
+
+<footer>Projeto "decision models": gerador de conversas sintéticas, treino e avaliação do Laya (laya 0.4.17, laya-multilingual 322M). Números de logs/compare-splits-cenario.json e logs/eval/.</footer>
+</div>
+
+<script>
+(function () {
+  // Distribuição de criticidade
+  var dist = [["normal", 362], ["importante", 250], ["grave", 118], ["BACEN", 47]];
+  var total = dist.reduce(function (s, d) { return s + d[1]; }, 0);
+  document.getElementById("dist").innerHTML = dist.map(function (d) {
+    var p = d[1] / total * 100;
+    return "<tr><td>" + d[0] + "</td><td class=\"n\">" + d[1] + "</td><td class=\"n\">" + p.toFixed(0) + "%</td>" +
+      "<td style=\"width:45%\"><div style=\"height:10px;border-radius:3px;background:var(--laya);width:" + (p / 46.6 * 100).toFixed(1) + "%\"></div></td></tr>";
+  }).join("");
+
+  // Gráfico de intervalos: linhas = métricas, cada sistema numa sub-linha.
+  function ciChart(el, rows, systems) {
+    var W = 760, left = 190, right = 24, sub = 16, gapRow = 14, top = 26;
+    var rowH = systems.length * sub + gapRow;
+    var H = top + rows.length * rowH + 6;
+    var x = function (v) { return left + (W - left - right) * v / 100; };
+    var s = "<svg viewBox=\"0 0 " + W + " " + H + "\" xmlns=\"http://www.w3.org/2000/svg\">";
+    s += "<g class=\"axis\">";
+    [0, 25, 50, 75, 100].forEach(function (t) {
+      s += "<line class=\"grid\" x1=\"" + x(t) + "\" x2=\"" + x(t) + "\" y1=\"" + (top - 8) + "\" y2=\"" + (H - 4) + "\"/>";
+      s += "<text x=\"" + x(t) + "\" y=\"" + (top - 13) + "\" text-anchor=\"middle\">" + t + "%</text>";
+    });
+    s += "</g>";
+    rows.forEach(function (r, i) {
+      var y0 = top + i * rowH;
+      s += "<text x=\"0\" y=\"" + (y0 + systems.length * sub / 2 + 4) + "\">" + r.label + "</text>";
+      systems.forEach(function (sys, j) {
+        var d = r.v[j]; if (!d) return;
+        var y = y0 + j * sub + sub / 2;
+        s += "<line x1=\"" + x(d[1]) + "\" x2=\"" + x(d[2]) + "\" y1=\"" + y + "\" y2=\"" + y + "\" stroke=\"var(" + sys + ")\" stroke-width=\"3\" stroke-linecap=\"round\" opacity=\"0.45\"/>";
+        s += "<circle cx=\"" + x(d[0]) + "\" cy=\"" + y + "\" r=\"5\" fill=\"var(" + sys + ")\" stroke=\"var(--surface)\" stroke-width=\"1.5\"/>";
+        var lx = x(d[2]) + 8, anchor = "start";
+        if (lx > W - 40) { lx = x(d[1]) - 8; anchor = "end"; }
+        s += "<text x=\"" + lx + "\" y=\"" + (y + 4) + "\" text-anchor=\"" + anchor + "\" style=\"font-family:var(--font-mono);font-size:10.5px;fill:var(" + sys + ")\">" + d[0] + "%</text>";
+      });
+    });
+    el.innerHTML = s + "</svg>";
+  }
+
+  ciChart(document.getElementById("chart1"), [
+    { label: "Assunto", v: [[100, 95, 100], [99, 93, 100], [32, 23, 43]] },
+    { label: "Sub-assunto (2 passos)", v: [[100, 95, 100], [99, 93, 100], [23, 15, 33]] },
+    { label: "Criticidade exata", v: [[85, 76, 92], [92, 84, 96], [29, 20, 40]] },
+    { label: "Recall grave ou BACEN", v: [[79, 52, 92], [93, 69, 99], [50, 27, 73]] },
+    { label: "Recall BACEN (n = 4)", v: [[100, 51, 100], [100, 51, 100], [100, 51, 100]] },
+    { label: "Precisão BACEN", v: [[100, 51, 100], [100, 51, 100], [5, 2, 13]] }
+  ], ["--laya", "--tfidf", "--base"]);
+
+  ciChart(document.getElementById("chart2"), [
+    { label: "Assunto", v: [[95, 92, 97], [89, 84, 92]] },
+    { label: "Sub-assunto (2 passos)", v: [[84, 77, 91], [82, 76, 86]] },
+    { label: "Criticidade exata", v: [[70, 62, 78], [82, 76, 86]] },
+    { label: "Criticidade macro-F1", v: [[74, 66, 82], [86, 81, 89]] },
+    { label: "Recall grave ou BACEN", v: [[76, 57, 92], [93, 81, 98]] },
+    { label: "Recall BACEN (n = 14)", v: [[100, 78, 100], [100, 78, 100]] },
+    { label: "Precisão BACEN", v: [[96, 64, 100], [100, 78, 100]] }
+  ], ["--laya", "--tfidf"]);
+
+  // Acerto por sub-assunto (cenários novos)
+  var persub = [
+    ["Aumento de limite", 15, 96, 67], ["Chave e limite Pix", 19, 100, 42], ["Tarifas da conta", 15, 84, 67],
+    ["Renegociação de dívida", 6, 83, 67], ["Bloqueio/desbloqueio", 18, 96, 89], ["Dúvida sobre fatura", 24, 97, 88],
+    ["Mudança de vencimento", 31, 97, 84], ["Segunda via do cartão", 21, 98, 100], ["Problema com Pix", 10, 83, 90],
+    ["Contratação de empréstimo", 16, 29, 50], ["Cobrança errada", 16, 73, 94], ["Segunda via da fatura", 16, 75, 100],
+    ["Adiantamento de parcelas", 31, 71, 97]
+  ];
+  document.getElementById("persub").innerHTML = persub.map(function (r) {
+    var d = r[2] - r[3];
+    var pill = Math.abs(d) < 15 ? "<span class=\"pill neutral\">" + (d > 0 ? "+" : "") + d + " p.p.</span>"
+      : d > 0 ? "<span class=\"pill good\">Laya +" + d + " p.p.</span>" : "<span class=\"pill bad\">Laya " + d + " p.p.</span>";
+    return "<tr><td>" + r[0] + "</td><td class=\"n\">" + r[1] + "</td><td class=\"n\">" + r[2] + "%</td><td class=\"n\">" + r[3] + "%</td><td>" + pill + "</td></tr>";
+  }).join("");
+
+  // Matrizes de confusão
+  var niveis = ["normal", "importante", "grave", "BACEN"];
+  function matrix(id, m, cor) {
+    var h = "<div></div>" + niveis.map(function (n) { return "<div class=\"h\">" + n + "</div>"; }).join("");
+    m.forEach(function (row, i) {
+      var tot = row.reduce(function (a, b) { return a + b; }, 0);
+      h += "<div class=\"r\">" + niveis[i] + "</div>";
+      row.forEach(function (v, j) {
+        var a = tot ? v / tot : 0;
+        var bg = "color-mix(in srgb, var(" + (i === j ? cor : "--bad") + ") " + Math.round(a * 85) + "%, var(--surface))";
+        var fg = a > 0.5 ? "var(--surface)" : "var(--ink)";
+        h += "<div class=\"c\" style=\"background:" + bg + ";color:" + fg + "\">" + v + "</div>";
+      });
+    });
+    document.getElementById(id).innerHTML = h;
+  }
+  matrix("m-laya", [[73, 23, 3, 0], [23, 61, 12, 0], [2, 9, 19, 0], [0, 0, 1, 13]], "--laya");
+  matrix("m-tfidf", [[91, 8, 0, 0], [26, 63, 7, 0], [1, 2, 26, 0], [0, 0, 0, 14]], "--tfidf");
+})();
+</script>

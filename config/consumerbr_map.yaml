@@ -1,0 +1,44 @@
+# Mapeamento dos rótulos do consumidor.gov.br (Dados abertos) para a nossa taxonomia.
+#
+# O rótulo de origem foi escolhido pelo próprio consumidor ao registrar a reclamação, não por um anotador:
+# serve como rótulo "prata" de assunto. Sub-assunto só é atribuído quando o Problema determina um único
+# sub-assunto nosso; o resto fica sem sub (avaliado só no assunto). Criticidade e risco BACEN não existem
+# na fonte. Revise este arquivo: cada linha é uma decisão de anotação.
+
+segmento: "Bancos, Financeiras e Administradoras de Cartão"
+
+# Assunto do consumidor.gov.br -> nosso assunto. "cartao" é resolvido pelo Problema (abaixo),
+# porque nossa taxonomia divide cartão em cartoes_limite e faturas_cobranca. Assuntos ausentes ficam fora.
+assuntos:
+  "Cartão de Crédito / Cartão de Débito / Cartão de Loja": cartao
+  "Conta corrente / Salário / Poupança /Conta Aposentadoria": conta_pix
+  "Crédito Consignado / Cartão de Crédito Consignado / RMC (para beneficiários do INSS)": emprestimos_financiamentos
+  "Crédito Consignado (para servidores públicos ou trabalhadores do setor privado)": emprestimos_financiamentos
+  "Crédito Pessoal e Demais Empréstimos (exceto financiamento de imóveis e veículos)": emprestimos_financiamentos
+  "Financiamentos de Veículos / Leasing": emprestimos_financiamentos
+  "Financiamento de Imóveis": emprestimos_financiamentos
+
+# (assunto mapeado, Problema) -> [assunto, sub_assunto]. sub_assunto null = assunto conhecido, sub indefinido.
+# Para "cartao", um Problema ausente daqui exclui a reclamação (não dá para saber o assunto).
+problemas:
+  cartao:
+    "Não entrega de cartão": [cartoes_limite, segunda_via_cartao]
+    "Bloqueio / Suspensão indevida do serviço": [cartoes_limite, bloqueio_desbloqueio]
+    "Cobrança de compra/saque não reconhecido": [faturas_cobranca, cobranca_errada]
+    "Cobrança em duplicidade / Cobrança referente a pagamento já efetuado": [faturas_cobranca, cobranca_errada]
+    "Cobrança por serviço/produto não contratado / não reconhecido / não solicitado": [faturas_cobranca, cobranca_errada]
+    "Cobrança de tarifas, taxas, valores não previstos / não informados": [faturas_cobranca, cobranca_errada]
+    "Cálculo de juros, saldo devedor (contestação, solicitação de histórico, dúvidas)": [faturas_cobranca, duvida_fatura]
+    "Não envio / atraso do boleto ou fatura / dificuldade com o pagamento": [faturas_cobranca, segunda_via_fatura]
+    # Nossa taxonomia põe renegociação de qualquer dívida em emprestimos_financiamentos.
+    "Renegociação / parcelamento de dívida": [emprestimos_financiamentos, renegociacao_divida]
+  conta_pix:
+    "Cobrança de tarifas, taxas, valores não previstos / não informados": [conta_pix, tarifas_conta]
+    "Cobrança por serviço/produto não contratado / não reconhecido / não solicitado": [conta_pix, tarifas_conta]
+  emprestimos_financiamentos:
+    "Renegociação / parcelamento de dívida": [emprestimos_financiamentos, renegociacao_divida]
+    "Negativação indevida (não cumprimento de acordo de parcelamento)": [emprestimos_financiamentos, renegociacao_divida]
+    "Dificuldade para obter boleto de quitação ou informações acerca de cálculos, pagamentos, saldo devedor": [emprestimos_financiamentos, adiantamento_parcelas]
+    "Dificuldade para contratar / recusa injustificada": [emprestimos_financiamentos, contratacao_emprestimo]
+    "Portabilidade não efetivada": [emprestimos_financiamentos, contratacao_emprestimo]
+    "Não entrega do contrato ou documentação relacionada ao serviço": [emprestimos_financiamentos, contratacao_emprestimo]

@@ -1,0 +1,336 @@
+<title>Laya no Call Center</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: faixa de 5 etapas em fluxo horizontal (empilha no celular) + painel de operação com as filas de criticidade e o laço de aprendizado. */
+:root {
+  --bg: #f5f7f8;
+  --surface: #ffffff;
+  --ink: #14232b;
+  --muted: #56666e;
+  --line: #d6dee2;
+  --accent: #0b6e6e;
+  --accent-soft: #e0f0ef;
+  --done: #1f7a4d;
+  --next: #9a6400;
+  --future: #5b6a73;
+  --c-normal: #2f7d55;
+  --c-importante: #b08600;
+  --c-grave: #c45a12;
+  --c-bacen: #b3261e;
+  --c-humano: #44608a;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171b; --surface: #16222a; --ink: #e4ecef; --muted: #9aabb3; --line: #2a3a43;
+    --accent: #4fc1bd; --accent-soft: #163536; --done: #5fcf94; --next: #e6b04a; --future: #9aabb3;
+    --c-normal: #5fcf94; --c-importante: #e6c34a; --c-grave: #f08a4b; --c-bacen: #f2726a; --c-humano: #8fb0e0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171b; --surface: #16222a; --ink: #e4ecef; --muted: #9aabb3; --line: #2a3a43;
+  --accent: #4fc1bd; --accent-soft: #163536; --done: #5fcf94; --next: #e6b04a; --future: #9aabb3;
+  --c-normal: #5fcf94; --c-importante: #e6c34a; --c-grave: #f08a4b; --c-bacen: #f2726a; --c-humano: #8fb0e0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 15px; line-height: 1.55;
+}
+.wrap {
+  max-width: 1280px; margin: 0 auto;
+  padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 44px;
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(30px, 4.2vw, 46px); font-weight: 700; line-height: 1.08; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 700; line-height: 1.25; }
+p { margin: 0; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 17px; color: var(--muted); max-width: 68ch; }
+
+header { display: grid; gap: 14px; }
+.kpis { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 6px; }
+.kpi { display: grid; gap: 0; }
+.kpi b { font-family: var(--f-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 13px; color: var(--muted); }
+
+/* Legenda de status */
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.done { color: var(--done); }
+.chip.next { color: var(--next); }
+.chip.future { color: var(--future); }
+
+/* Fluxo de etapas */
+.section-head { display: grid; gap: 6px; margin-bottom: 18px; }
+.flow { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 1080px) {
+  .flow { grid-template-columns: 1.25fr auto 1fr auto 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; }
+}
+.stage {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 18px 16px 16px; display: grid; gap: 10px; align-content: start; min-width: 0;
+  border-top: 4px solid var(--line);
+}
+.stage.done { border-top-color: var(--done); }
+.stage.next { border-top-color: var(--next); }
+.stage-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.num { font-family: var(--f-mono); font-size: 13px; color: var(--muted); }
+.stage p.what { font-size: 14px; }
+.stage ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13.5px; color: var(--muted); }
+.stage .fact { font-family: var(--f-mono); font-size: 12px; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 6px 8px; }
+.arrow { display: grid; place-items: center; color: var(--muted); font-size: 22px; line-height: 1; padding: 2px 0; }
+.arrow span { display: inline-block; transform: rotate(90deg); }
+@media (min-width: 1080px) { .arrow span { transform: none; } }
+
+/* Mini-fluxo dentro da etapa 1 */
+.mini { display: grid; gap: 4px; }
+.mini div { font-size: 13px; padding: 6px 9px; border: 1px dashed var(--line); border-radius: 6px; display: flex; justify-content: space-between; gap: 8px; }
+.mini div small { color: var(--muted); font-family: var(--f-mono); font-size: 11px; white-space: nowrap; }
+
+/* Operação */
+.ops { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; display: grid; gap: 20px; }
+.ops-grid { display: grid; gap: 22px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .ops-grid { grid-template-columns: 1fr 1.3fr; } }
+.ops-in { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.transcript { font-family: var(--f-mono); font-size: 12.5px; line-height: 1.6; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; color: var(--ink); }
+.transcript em { font-style: normal; color: var(--muted); }
+.answers { display: grid; gap: 8px; }
+.ans { display: grid; grid-template-columns: minmax(110px, 0.9fr) 1.6fr; gap: 10px; align-items: center; font-size: 13.5px; }
+.ans .q { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.ans .bar { position: relative; height: 26px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.ans .bar i { position: absolute; inset: 0 auto 0 0; background: var(--accent-soft); border-right: 2px solid var(--accent); }
+.ans .bar span { position: relative; display: flex; justify-content: space-between; padding: 0 8px; line-height: 24px; font-size: 12.5px; gap: 8px; }
+.ans .bar span b { font-weight: 600; }
+.ans .bar span em { font-style: normal; font-family: var(--f-mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+.note { font-size: 12.5px; color: var(--muted); }
+
+.lanes { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.lane { display: grid; grid-template-columns: 128px 1fr; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 8px; background: var(--bg); border-left: 5px solid; }
+.lane b { font-family: var(--f-display); font-size: 15px; }
+.lane span { font-size: 13.5px; color: var(--muted); }
+.lane.normal { border-color: var(--c-normal); } .lane.normal b { color: var(--c-normal); }
+.lane.importante { border-color: var(--c-importante); } .lane.importante b { color: var(--c-importante); }
+.lane.grave { border-color: var(--c-grave); } .lane.grave b { color: var(--c-grave); }
+.lane.bacen { border-color: var(--c-bacen); } .lane.bacen b { color: var(--c-bacen); }
+.lane.humano { border-color: var(--c-humano); border-left-style: dashed; } .lane.humano b { color: var(--c-humano); }
+@media (max-width: 480px) { .lane { grid-template-columns: 1fr; gap: 2px; } .ans { grid-template-columns: 1fr; gap: 4px; } }
+
+.loop { display: flex; gap: 14px; align-items: flex-start; border: 1px dashed var(--accent); border-radius: 10px; padding: 14px 16px; background: var(--accent-soft); }
+.loop .sym { font-size: 26px; color: var(--accent); line-height: 1; }
+.loop p { font-size: 14px; }
+
+/* Por que / salvaguardas */
+.two { display: grid; gap: 22px; grid-template-columns: 1fr; }
+@media (min-width: 900px) { .two { grid-template-columns: 1fr 1fr; } }
+.list { display: grid; gap: 12px; margin-top: 12px; }
+.item { display: grid; gap: 2px; padding-left: 14px; border-left: 2px solid var(--line); }
+.item b { font-weight: 600; }
+.item span { color: var(--muted); font-size: 14px; }
+
+.bench { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 12px; font-variant-numeric: tabular-nums; }
+.bench th, .bench td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.bench th { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.bench td.win { color: var(--done); font-weight: 600; }
+.table-scroll { overflow-x: auto; }
+
+footer { font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Projeto Decision Models · Call center bancário</div>
+  <h1>Como vamos treinar o Laya para classificar e priorizar atendimentos</h1>
+  <p class="lede">Um modelo aberto, pequeno e rápido que lê cada atendimento e responde quatro perguntas: qual o assunto, qual o sub-assunto, quão grave é e se há risco de reclamação no Banco Central. Ele roda dentro da nossa infraestrutura e precisa superar o Jev, a referência de mercado.</p>
+  <div class="kpis">
+    <div class="kpi"><b>867</b><span>conversas sintéticas geradas</span></div>
+    <div class="kpi"><b>777</b><span>aprovadas pela verificação cega</span></div>
+    <div class="kpi"><b>30 mil</b><span>meta para o treinamento</span></div>
+    <div class="kpi"><b>~45 h</b><span>de geração local até a meta</span></div>
+  </div>
+  <div class="legend">
+    <span class="chip done">Pronto</span>
+    <span class="chip next">Próximo passo</span>
+    <span class="chip future">Depende de dados reais</span>
+  </div>
+</header>
+
+<section>
+  <div class="section-head">
+    <div class="eyebrow">Construção do modelo</div>
+    <h2>Cinco etapas, da conversa simulada ao modelo validado</h2>
+  </div>
+
+  <div class="flow">
+    <article class="stage done">
+      <div class="stage-top"><span class="num">Etapa 1</span><span class="chip done">Pronto</span></div>
+      <h3>Gerar conversas de treino</h3>
+      <p class="what">Ainda não temos transcrições reais, então simulamos ligações com rótulos conhecidos.</p>
+      <div class="mini">
+        <div>Catálogo de assuntos e gravidades <small>13 sub-assuntos</small></div>
+        <div>IA local escreve a ligação <small>gemma4 12B</small></div>
+        <div>Segunda IA confere sem ver o rótulo <small>qwen 27B</small></div>
+        <div>Descarta o que é ambíguo <small>90% aprovadas</small></div>
+      </div>
+      <div class="fact">Juiz concorda: assunto 93% · gravidade 80% · BACEN 13/13</div>
+    </article>
+
+    <div class="arrow" aria-hidden="true"><span>→</span></div>
+
+    <article class="stage next">
+      <div class="stage-top"><span class="num">Etapa 2</span><span class="chip next">Próximo</span></div>
+      <h3>Separar e formatar</h3>
+      <p class="what">Cada conversa vira um exemplo com as quatro perguntas e as respostas corretas.</p>
+      <ul>
+        <li>80% treino</li>
+        <li>10% calibração</li>
+        <li>10% prova final, nunca vista no treino</li>
+      </ul>
+      <div class="fact">Divisão fixa por conversa: nada da prova vaza para o treino</div>
+    </article>
+
+    <div class="arrow" aria-hidden="true"><span>→</span></div>
+
+    <article class="stage next">
+      <div class="stage-top"><span class="num">Etapa 3</span><span class="chip next">Próximo</span></div>
+      <h3>Treinar o Laya</h3>
+      <p class="what">Partimos do Laya multilíngue, que já entende português, e o especializamos no nosso call center.</p>
+      <ul>
+        <li>Recompensa quando acerta com a confiança certa</li>
+        <li>Penalidade quando erra com convicção</li>
+      </ul>
+      <div class="fact">322M parâmetros · licença aberta · ~5 h em GPU*</div>
+    </article>
+
+    <div class="arrow" aria-hidden="true"><span>→</span></div>
+
+    <article class="stage next">
+      <div class="stage-top"><span class="num">Etapa 4</span><span class="chip next">Próximo</span></div>
+      <h3>Calibrar a confiança</h3>
+      <p class="what">Se o modelo diz 90% de certeza, ele precisa acertar 9 em cada 10 casos.</p>
+      <ul>
+        <li>Ajuste feito no conjunto de calibração</li>
+        <li>Define o limiar abaixo do qual o caso vai para um humano</li>
+      </ul>
+      <div class="fact">Meta: erro máximo combinado com Compliance para BACEN</div>
+    </article>
+
+    <div class="arrow" aria-hidden="true"><span>→</span></div>
+
+    <article class="stage">
+      <div class="stage-top"><span class="num">Etapa 5</span><span class="chip future">Dados reais</span></div>
+      <h3>Comparar com o Jev</h3>
+      <p class="what">Prova final nas mesmas conversas para os dois modelos, incluindo um lote real anonimizado.</p>
+      <ul>
+        <li>Não deixar passar BACEN e grave</li>
+        <li>Confiança mais confiável que a do Jev</li>
+        <li>Velocidade e custo por atendimento</li>
+      </ul>
+      <div class="fact">Só vai para produção se vencer nos casos críticos</div>
+    </article>
+  </div>
+</section>
+
+<section class="ops">
+  <div class="section-head" style="margin-bottom:0">
+    <div class="eyebrow">Em operação</div>
+    <h2>O que acontece com cada atendimento</h2>
+  </div>
+
+  <div class="ops-grid">
+    <div class="ops-in">
+      <h3>O modelo lê a ligação…</h3>
+      <div class="transcript">
+        <em>Cliente:</em> é a terceira vez que eu ligo, cobraram de novo a anuidade que vocês disseram que era isenta. Se não resolver hoje eu vou registrar reclamação no Banco Central.<br>
+        <em>Atendente:</em> entendo, senhor, vou verificar o estorno…
+      </div>
+      <h3>…e responde quatro perguntas em milissegundos</h3>
+      <div class="answers">
+        <div class="ans"><span class="q">assunto</span><div class="bar"><i style="width:96%"></i><span><b>Faturas e cobrança</b><em>96%</em></span></div></div>
+        <div class="ans"><span class="q">sub-assunto</span><div class="bar"><i style="width:91%"></i><span><b>Cobrança errada</b><em>91%</em></span></div></div>
+        <div class="ans"><span class="q">gravidade</span><div class="bar"><i style="width:84%"></i><span><b>BACEN</b><em>84%</em></span></div></div>
+        <div class="ans"><span class="q">risco BACEN</span><div class="bar"><i style="width:93%"></i><span><b>Sim</b><em>93%</em></span></div></div>
+      </div>
+      <p class="note">Exemplo ilustrativo. As porcentagens mostram a confiança calibrada do modelo em cada resposta.</p>
+    </div>
+
+    <div class="lanes">
+      <h3>A resposta define a fila</h3>
+      <div class="lane normal"><b>Normal</b><span>Fila padrão, sem ação extra</span></div>
+      <div class="lane importante"><b>Importante</b><span>Acompanhamento com prazo de resposta</span></div>
+      <div class="lane grave"><b>Grave</b><span>Prioridade e supervisor notificado</span></div>
+      <div class="lane bacen"><b>BACEN</b><span>Ouvidoria e Compliance acionados na hora</span></div>
+      <div class="lane humano"><b>Baixa confiança</b><span>Analista revisa antes de qualquer decisão</span></div>
+    </div>
+  </div>
+
+  <div class="loop">
+    <div class="sym" aria-hidden="true">↺</div>
+    <p><b>Aprendizado contínuo.</b> Cada caso revisado por um analista vira um exemplo real e rotulado. Esses exemplos substituem aos poucos os dados simulados e entram no próximo ciclo de treino, voltando à etapa 1.</p>
+  </div>
+</section>
+
+<section class="two">
+  <div>
+    <div class="eyebrow">Por que este desenho</div>
+    <h2>Benefícios para o banco</h2>
+    <div class="list">
+      <div class="item"><b>Os dados não saem do banco</b><span>Modelo aberto em container próprio. Sem envio de conversas para APIs externas (LGPD e sigilo bancário).</span></div>
+      <div class="item"><b>Resposta sempre no formato certo</b><span>O modelo só escolhe entre opções definidas por nós. Não inventa texto e não quebra integrações.</span></div>
+      <div class="item"><b>Sabe quando não sabe</b><span>A confiança calibrada permite automatizar os casos claros e mandar os duvidosos para pessoas.</span></div>
+      <div class="item"><b>Rápido e barato</b><span>Dezenas de milissegundos por atendimento*, em GPU ou CPU, sem custo por chamada.</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="eyebrow">Referência a superar</div>
+    <h2>Laya frente ao Jev</h2>
+    <div class="table-scroll">
+      <table class="bench">
+        <thead><tr><th>Critério</th><th>Jev</th><th>Laya</th></tr></thead>
+        <tbody>
+          <tr><td>Acerto em decisões tipadas*</td><td>72,7%</td><td class="win">76,6%</td></tr>
+          <tr><td>Erro de calibração* (menor é melhor)</td><td>0,246</td><td class="win">0,081</td></tr>
+          <tr><td>Muitas opções (77 categorias)*</td><td class="win">87,0%</td><td>42,5%</td></tr>
+          <tr><td>Tempo por pergunta*</td><td>~250 ms</td><td class="win">~33 ms</td></tr>
+          <tr><td>Onde roda</td><td>API externa fechada</td><td class="win">Nossa infraestrutura</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:10px">O Laya perde quando há muitas opções de uma vez. Por isso classificamos em dois passos: primeiro 4 assuntos, depois o sub-assunto.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">Salvaguardas</div>
+  <h2 style="margin-bottom:4px">O que precisa estar resolvido antes de produção</h2>
+  <div class="two">
+    <div class="list">
+      <div class="item"><b>Validar com conversas reais</b><span>Dados simulados ensinam o modelo, mas a aprovação final exige um lote real anonimizado e rotulado por especialistas.</span></div>
+      <div class="item"><b>Definições assinadas por Compliance</b><span>O que é "grave" e o que é "BACEN" precisa ser escrito e aprovado pela área, com exemplos de fronteira.</span></div>
+    </div>
+    <div class="list">
+      <div class="item"><b>Pessoas nos casos críticos</b><span>Começar com o modelo sugerindo e o analista decidindo. Automatizar só depois de medir o desempenho real.</span></div>
+      <div class="item"><b>Monitoramento contínuo</b><span>Acompanhar acerto e calibração por mês, e treinar de novo quando surgirem novos produtos ou mudar a regulação.</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>* Números de referência do Laya e do Jev publicados pelo autor do Laya (Convai Innovations, 2026), medidos em bases públicas. Ainda não foram reproduzidos nos nossos dados.</span>
+  <span>Números do projeto: geração e verificação locais em 29/10/2026, taxonomia v2. Banco, clientes e conversas do exemplo são fictícios.</span>
+</footer>
+
+</div>

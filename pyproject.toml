@@ -1,0 +1,28 @@
+[project]
+name = "callsim"
+version = "0.1.0"
+description = "Gerador de conversas sintéticas de call center bancário para treinar decision models (Laya)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "faker>=40.44.0",
+    "httpx>=0.28.1",
+    "laya==0.4.17",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.6",
+    "tqdm>=4.70.1",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.17,<0.13.0"]
+build-backend = "uv_build"
+
+[project.scripts]
+callsim-generate = "callsim.generate:main"
+callsim-dataset = "callsim.dataset:main"
+callsim-verify = "callsim.verify:main"
+callsim-laya-data = "callsim.laya_data:main"
+callsim-laya-eval = "callsim.laya_eval:main"
+callsim-baseline = "callsim.baseline:main"
+callsim-compare = "callsim.metrics:main"
+callsim-consumerbr = "callsim.consumerbr:main"

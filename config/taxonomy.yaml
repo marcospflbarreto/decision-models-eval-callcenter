@@ -1,0 +1,190 @@
+# Taxonomia do call center bancário sintético.
+# Os rótulos (chaves) são o que o Laya vai aprender. `descricao` guia o gerador e o juiz;
+# `curta` é o texto da opção nas perguntas do Laya (precisa caber no orçamento de tokens do head).
+# Mude `versao` sempre que alterar definições: a verificação cega é refeita por versão.
+
+versao: 2
+
+assuntos:
+  cartoes_limite:
+    curta: "cartão de crédito: limite, bloqueio, perda ou 2ª via do cartão"
+    descricao: "Cartões e limite de crédito: limite, bloqueio, perda, entrega e 2ª via do cartão físico"
+    peso: 0.24
+    sub_assuntos:
+      aumento_limite:
+        curta: "valor do limite do cartão"
+        descricao: "valor do limite de crédito: pedir aumento, redução ou entender como o limite é definido. Não inclui cartão bloqueado ou recusado (bloqueio_desbloqueio) nem dúvidas sobre a fatura (duvida_fatura)"
+        cenarios:  # t = texto; n = níveis de criticidade em que o cenário faz sentido (omitido = todos)
+          - "cliente quer aumento de limite para uma compra grande e teve o pedido negado no app"
+          - {t: "limite foi reduzido sem aviso e o cliente quer explicação", n: [importante, grave, BACEN]}
+          - "cliente quer saber como o limite é calculado e o que fazer para conseguir mais limite no futuro"
+          - {t: "cliente quer reduzir o limite por segurança", n: [normal, BACEN]}
+      bloqueio_desbloqueio:
+        curta: "cartão bloqueado, recusado ou perdido"
+        descricao: "cartão bloqueado, recusado em compras, perdido, roubado ou com problema para desbloquear, mesmo quando há limite disponível"
+        cenarios:
+          - "cartão foi recusado em várias compras sem motivo aparente"
+          - {t: "cliente perdeu a carteira e quer bloquear o cartão", n: [normal, importante]}
+          - "cartão bloqueado preventivamente por suspeita de fraude"
+          - {t: "cliente não consegue desbloquear o cartão novo pelo app", n: [normal, importante, BACEN]}
+      segunda_via_cartao:
+        curta: "2ª via, entrega ou cartão danificado"
+        descricao: "pedido de 2ª via do cartão físico, cartão não recebido ou danificado"
+        cenarios:
+          - {t: "cartão chegou danificado / chip não funciona", n: [normal, importante, BACEN]}
+          - "cartão novo não chegou após o prazo de entrega"
+          - {t: "cliente quer 2ª via e pergunta se há tarifa", n: [normal, BACEN]}
+  faturas_cobranca:
+    curta: "fatura do cartão: boleto, dúvidas, cobranças e vencimento"
+    descricao: "Faturas e cobrança do cartão: 2ª via de fatura/boleto, dúvidas, cobranças indevidas e data de vencimento"
+    peso: 0.34
+    sub_assuntos:
+      segunda_via_fatura:
+        curta: "2ª via de fatura ou boleto"
+        descricao: "pedido de 2ª via de fatura, boleto ou código de barras/Pix copia e cola para pagamento"
+        cenarios:
+          - "fatura não chegou no e-mail e o vencimento é hoje"
+          - {t: "boleto está com código de barras inválido no app de outro banco", n: [normal, importante]}
+          - {t: "cliente perdeu o boleto e quer pagar com Pix", n: [normal]}
+      duvida_fatura:
+        curta: "dúvida sobre valores ou juros da fatura"
+        descricao: "dúvida sobre lançamentos, encargos, juros, parcelamento ou valor mínimo da fatura"
+        cenarios:
+          - "cliente não entende por que a fatura veio mais alta que o normal"
+          - {t: "dúvida sobre juros do rotativo após pagar o mínimo", n: [normal, importante, BACEN]}
+          - {t: "cliente não reconhece o nome do estabelecimento na fatura mas depois lembra da compra", n: [normal]}
+          - {t: "dúvida sobre como funciona o parcelamento da fatura", n: [normal]}
+      cobranca_errada:
+        curta: "cobrança indevida na fatura"
+        descricao: "cobrança indevida NA FATURA DO CARTÃO DE CRÉDITO: compra duplicada, anuidade indevida, seguro/assistência não solicitado, compra não reconhecida, estorno não feito. Tarifas debitadas na conta corrente são tarifas_conta; parcelas de empréstimo são emprestimos_financiamentos"
+        cenarios:
+          - {t: "compra cobrada em duplicidade", n: [importante, grave, BACEN]}
+          - {t: "anuidade cobrada mesmo com isenção prometida na contratação", n: [importante, grave, BACEN]}
+          - {t: "seguro ou assistência que o cliente nunca contratou aparecendo na fatura", n: [importante, grave, BACEN]}
+          - {t: "estorno de compra cancelada não apareceu na fatura", n: [importante, grave, BACEN]}
+          - {t: "compras não reconhecidas em outro estado/país", n: [grave, BACEN]}
+      mudanca_data_vencimento:
+        curta: "mudar data de vencimento"
+        descricao: "pedido de alteração da data de vencimento ou de cobrança"
+        cenarios:
+          - {t: "cliente mudou de emprego e o salário agora cai em outra data", n: [normal]}
+          - {t: "cliente quer alinhar o vencimento do cartão com o dia do pagamento", n: [normal]}
+          - {t: "cliente já pediu a troca de data e ela não foi efetivada", n: [importante, BACEN]}
+  conta_pix:
+    curta: "conta corrente e Pix: transferências, chaves e tarifas"
+    descricao: "Conta corrente e Pix: transferências, chaves, limites Pix, tarifas e acesso à conta"
+    peso: 0.20
+    sub_assuntos:
+      problema_pix:
+        curta: "Pix errado, não recebido ou golpe"
+        descricao: "Pix não recebido, enviado errado, devolução, MED (mecanismo especial de devolução) ou golpe via Pix"
+        cenarios:
+          - {t: "Pix enviado para a chave errada e o cliente quer reaver o dinheiro", n: [importante, grave, BACEN]}
+          - {t: "cliente caiu em golpe do falso parente e fez um Pix", n: [grave, BACEN]}
+          - {t: "Pix recebido não aparece no saldo", n: [importante, grave]}
+          - {t: "cliente pede devolução via MED de um golpe e o prazo não está sendo cumprido", n: [BACEN]}
+      chave_limite_pix:
+        curta: "chave Pix ou limite Pix"
+        descricao: "cadastro/portabilidade de chave Pix e ajuste de limites Pix"
+        cenarios:
+          - {t: "cliente quer aumentar o limite noturno do Pix", n: [normal]}
+          - {t: "chave Pix (CPF) está vinculada em outro banco e o cliente quer trazer", n: [normal, importante]}
+          - {t: "cliente não consegue cadastrar o celular como chave", n: [normal, importante]}
+      tarifas_conta:
+        curta: "tarifas da conta, encerramento ou cheque especial"
+        descricao: "tarifas e pacote de serviços debitados NA CONTA CORRENTE (inclusive tarifas não contratadas), encerramento de conta e cheque especial. Não inclui cobranças na fatura do cartão (cobranca_errada)"
+        cenarios:
+          - {t: "cobrança de pacote de tarifas que o cliente não contratou", n: [importante, grave, BACEN]}
+          - {t: "cliente quer encerrar a conta e o banco dificulta", n: [BACEN]}
+          - {t: "juros de cheque especial sem que o cliente soubesse que usou", n: [importante, grave, BACEN]}
+  emprestimos_financiamentos:
+    curta: "empréstimos e financiamentos: contratação, quitação e dívidas"
+    descricao: "Empréstimos e financiamentos: contratação, adiantamento/quitação de parcelas e renegociação de dívida"
+    peso: 0.22
+    sub_assuntos:
+      contratacao_emprestimo:
+        curta: "contratar ou entender empréstimo/consignado"
+        descricao: "simulação, contratação, consignado, portabilidade de crédito ou dúvida sobre contrato de empréstimo/financiamento"
+        cenarios:
+          - {t: "cliente quer simular um empréstimo pessoal", n: [normal]}
+          - {t: "cliente aposentado descobriu um consignado que não reconhece", n: [grave, BACEN]}
+          - {t: "pedido de portabilidade de consignado de outro banco", n: [normal, importante, BACEN]}
+          - {t: "dúvida sobre CET e taxa do financiamento de veículo", n: [normal]}
+      adiantamento_parcelas:
+        curta: "adiantar ou quitar parcelas"
+        descricao: "adiantamento ou quitação antecipada de parcelas de empréstimo/financiamento com desconto de juros"
+        cenarios:
+          - {t: "cliente quer adiantar as 5 últimas parcelas do financiamento", n: [normal, importante]}
+          - {t: "cliente quer quitar o empréstimo e pergunta o desconto", n: [normal, importante]}
+          - {t: "atendente não aplicou o desconto proporcional dos juros na antecipação", n: [BACEN]}
+      renegociacao_divida:
+        curta: "dívida em atraso, acordo ou negativação"
+        descricao: "renegociação, parcelamento de dívida em atraso, acordo, negativação e cobrança de dívida"
+        cenarios:
+          - {t: "cliente desempregado com parcelas atrasadas quer renegociar", n: [importante, grave]}
+          - {t: "nome foi negativado mesmo com acordo em dia", n: [grave, BACEN]}
+          - {t: "cliente recebe ligações de cobrança várias vezes por dia, inclusive de madrugada", n: [grave, BACEN]}
+          - {t: "cliente quer entender a proposta de acordo do Desenrola/feirão", n: [normal]}
+
+# Criticidade é ordinal (score). BACEN é o topo: risco regulatório/reclamação formal.
+criticidade:
+  niveis: [normal, importante, grave, BACEN]
+  # Textos curtos dos níveis para a pergunta `score` do Laya.
+  curtas:
+    normal: "rotina, sem prejuízo ao cliente"
+    importante: "problema com algum impacto, tratável no 1º nível"
+    grave: "prejuízo relevante, fraude, vulnerável ou reincidência"
+    BACEN: "reclamação formal ou ameaça ao Banco Central/Ouvidoria/Procon"
+  distribuicao: {normal: 0.45, importante: 0.30, grave: 0.17, BACEN: 0.08}
+  definicoes:
+    normal: "dúvida, consulta ou solicitação rotineira; sem prejuízo ao cliente; resolvida ou resolvível no primeiro contato"
+    importante: "problema real com algum impacto ao cliente (pequeno valor, transtorno, prazo), tratável no 1º nível ou com protocolo"
+    grave: "prejuízo financeiro relevante, fraude/golpe, falha sistêmica, cliente vulnerável (idoso, doente, desempregado) prejudicado, reincidência sem solução ou risco de negativação indevida"
+    BACEN: "cliente já registrou ou ameaça explicitamente registrar reclamação no Banco Central / Ouvidoria / Procon / Justiça, OU o banco se recusa a cumprir um direito regulatório na própria ligação (negar desconto proporcional em quitação antecipada, dificultar encerramento de conta ou portabilidade, não cumprir o MED do Pix). Uma cobrança indevida, por si só, NÃO é BACEN: é importante ou grave conforme o prejuízo"
+  # Gatilhos que o gerador sorteia para "empurrar" a conversa para o nível alvo.
+  gatilhos:
+    normal:
+      - "cliente só quer uma informação e fica satisfeito"
+      - "pedido simples atendido na hora"
+    importante:
+      - "valor envolvido pequeno (até R$ 300)"
+      - "cliente precisa de solução em poucos dias"
+      - "é o segundo contato sobre o mesmo assunto"
+    grave:
+      - "valor envolvido alto (acima de R$ 2.000)"
+      - "cliente é idoso ou vulnerável e foi prejudicado"
+      - "terceiro ou mais contato sem solução"
+      - "risco de nome ser negativado indevidamente"
+      - "envolve fraude ou golpe"
+    BACEN:
+      - "cliente diz que já abriu reclamação no Banco Central (RDR) e ainda não foi resolvido"
+      - "cliente ameaça explicitamente ir ao Banco Central ou à Ouvidoria"
+      - "cliente diz que vai ao Procon / Reclame Aqui / Justiça"
+      - "cobrança indevida repetida mesmo após reclamações, e o cliente avisa que vai formalizar reclamação no Banco Central"
+
+# Fatores de diversidade sorteados por conversa.
+diversidade:
+  perfil_cliente:
+    - "calmo e educado"
+    - "irritado e impaciente"
+    - "confuso, com pouca familiaridade com termos bancários"
+    - "idoso, fala devagar e repete informações"
+    - "apressado, responde com frases curtas"
+    - "desconfiado, acha que está sendo enganado"
+    - "jovem, usa gírias e linguagem informal"
+    - "empresário, objetivo e técnico"
+  perfil_atendente:
+    - "experiente e empático"
+    - "novato, consulta o sistema e pede para aguardar várias vezes"
+    - "seguindo script de forma robótica"
+    - "cansado e pouco atencioso"
+  desfecho:
+    - "resolvido na ligação"
+    - "protocolo aberto com prazo de resposta"
+    - "transferido para outro setor"
+    - "não resolvido, cliente insatisfeito"
+    - "ligação cai no meio"
+  tamanho: {curta: [6, 10], media: [11, 20], longa: [21, 34]}
+  ruido_asr: {nenhum: 0.4, leve: 0.4, forte: 0.2}
+  prob_assunto_secundario: 0.2
+  prob_distrator_bacen: 0.06   # menciona "Banco Central" sem ser reclamação (hard negative)

@@ -1,0 +1,305 @@
+<title>Auditoria ConsumerBR</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+/* Layout: mesa de anotação — texto da reclamação à esquerda (leitura longa), ficha de rótulos à direita, mapa das 200 no topo. */
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --ink: #18202c; --muted: #5b6676; --line: #d9dee6;
+  --accent: #1f4fbf; --accent-soft: #e3eafb;
+  --ok: #2f7d4f; --warn: #b26a00; --bad: #b8322a; --reg: #6b3fa8;
+  --mask: #e9edf3;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --read: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11151c; --surface: #19202a; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+  --accent: #7ea2ff; --accent-soft: #1e2a45;
+  --ok: #5fbf86; --warn: #e3a33c; --bad: #ef7a70; --reg: #b494ea; --mask: #26303d; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #19202a; --ink: #e6eaf0; --muted: #98a3b3; --line: #2c3542;
+  --accent: #7ea2ff; --accent-soft: #1e2a45;
+  --ok: #5fbf86; --warn: #e3a33c; --bad: #ef7a70; --reg: #b494ea; --mask: #26303d; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px }
+h1 { font: 700 1.5rem/1.2 var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em }
+.sub { color: var(--muted); margin: 2px 0 0 }
+.count { font: 500 0.9rem var(--mono); color: var(--muted); font-variant-numeric: tabular-nums }
+.count b { color: var(--ink); font-weight: 500 }
+
+details.proto { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px }
+details.proto summary { cursor: pointer; font-weight: 600 }
+details.proto ul { margin: 8px 0 4px; padding-left: 20px; display: grid; gap: 4px; max-width: 80ch }
+
+.map { display: grid; grid-template-columns: repeat(auto-fill, minmax(18px, 1fr)); gap: 3px }
+.map button { aspect-ratio: 1; max-width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 3px; padding: 0; cursor: pointer }
+.map button.done { background: var(--ok); border-color: var(--ok) }
+.map button.doubt { background: var(--warn); border-color: var(--warn) }
+.map button.cur { outline: 2px solid var(--accent); outline-offset: 1px }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.8rem; color: var(--muted) }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; border: 1px solid var(--line) }
+
+.desk { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start }
+@media (max-width: 820px) { .desk { grid-template-columns: 1fr } }
+.paper { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px 26px; min-width: 0 }
+.paper .meta { display: flex; justify-content: space-between; gap: 10px; font: 500 0.78rem var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px }
+.texto { font: 400 1.06rem/1.7 var(--read); max-width: 68ch; white-space: pre-wrap; overflow-wrap: anywhere }
+.texto .m { background: var(--mask); border-radius: 3px; padding: 0 3px; font: 400 0.78em var(--mono); color: var(--muted) }
+.nav { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap }
+
+form.ficha { display: grid; gap: 16px; min-width: 0 }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; min-width: 0 }
+legend { font: 600 0.78rem var(--body); text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); margin-bottom: 6px; padding: 0 }
+.opt { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); cursor: pointer }
+.opt:hover { border-color: var(--accent) }
+.opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft) }
+.opt input { margin: 3px 0 0; accent-color: var(--accent) }
+.opt .k { font-weight: 600 }
+.opt .d { grid-column: 2; font-size: 0.82rem; color: var(--muted); line-height: 1.4 }
+.opt kbd { font: 500 0.72rem var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; margin-left: 6px }
+.crit { grid-template-columns: repeat(4, minmax(0, 1fr)) }
+.crit .opt { grid-template-columns: auto 1fr }
+@media (max-width: 480px) { .crit { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.sw { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px }
+.row { display: flex; flex-wrap: wrap; gap: 8px }
+.row .opt { flex: 1 1 140px }
+textarea { width: 100%; min-height: 56px; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; resize: vertical }
+textarea:focus-visible, button:focus-visible, .opt:focus-within { outline: 2px solid var(--accent); outline-offset: 1px }
+
+button.b { font: 600 0.9rem var(--body); padding: 9px 16px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+button.b.primary { background: var(--accent); border-color: var(--accent); color: var(--surface) }
+button.b:disabled { opacity: 0.5; cursor: not-allowed }
+.status { font-size: 0.85rem; color: var(--muted); min-height: 1.3em }
+.status.err { color: var(--bad) }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 8px; padding: 28px; color: var(--muted); text-align: center }
+@media (prefers-reduced-motion: no-preference) { .opt, .map button { transition: background .12s, border-color .12s } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Auditoria ConsumerBR</h1>
+      <p class="sub">200 reclamações reais contra bancos. Rotule cada uma como se fosse a fala do cliente numa ligação.</p>
+    </div>
+    <div class="count" id="count">— de 200 rotuladas</div>
+  </header>
+
+  <details class="proto" id="proto" open>
+    <summary>Como rotular (leia antes da primeira)</summary>
+    <ul>
+      <li>Você não vê o rótulo de origem: a ideia é rotular às cegas. Cada pessoa vê só as próprias respostas.</li>
+      <li><b>Assunto</b> é o tema principal da reclamação. Se nenhum dos quatro serve (seguro, consignado não reconhecido, golpe sem cartão/Pix, cadastro), marque <b>Fora da taxonomia</b>.</li>
+      <li><b>Sub-assunto</b>: escolha entre os do assunto marcado. Se nenhum descreve o problema, marque <b>Nenhum se aplica</b>.</li>
+      <li><b>Criticidade</b> segue as definições do projeto, as mesmas usadas para gerar e treinar.</li>
+      <li><b>Risco BACEN</b>: sim só se o texto cita Banco Central, Ouvidoria, Procon ou Justiça, ou mostra o banco negando um direito regulatório. Ter registrado no consumidor.gov.br não conta, porque vale para todas.</li>
+      <li>Trechos como <span class="texto"><span class="m">[MASCARADO]</span></span> foram anonimizados na fonte.</li>
+      <li>Atalhos: <kbd>1</kbd>–<kbd>5</kbd> assunto, <kbd>Enter</kbd> salva e avança, <kbd>←</kbd> <kbd>→</kbd> navegam.</li>
+    </ul>
+  </details>
+
+  <div>
+    <div class="map" id="map" aria-label="Mapa das 200 reclamações"></div>
+    <div class="legend" style="margin-top:8px"><span><i></i>a fazer</span><span><i style="background:var(--ok);border-color:var(--ok)"></i>rotulada</span><span><i style="background:var(--warn);border-color:var(--warn)"></i>rotulada com dúvida</span></div>
+  </div>
+
+  <div id="main">
+    <div class="empty" id="empty">Carregando as 200 reclamações…</div>
+    <div class="desk" id="desk" hidden>
+      <article class="paper">
+        <div class="meta"><span id="pos">Reclamação</span><span id="len"></span></div>
+        <div class="texto" id="texto"></div>
+        <div class="nav">
+          <button class="b" type="button" id="prev">← Anterior</button>
+          <button class="b" type="button" id="next">Próxima →</button>
+          <button class="b" type="button" id="nextTodo">Próxima a fazer</button>
+        </div>
+      </article>
+
+      <form class="ficha" id="ficha">
+        <fieldset id="fsAssunto"><legend>Assunto</legend></fieldset>
+        <fieldset id="fsSub"><legend>Sub-assunto</legend></fieldset>
+        <fieldset><legend>Criticidade</legend><div class="crit" id="fsCrit" style="display:grid;gap:6px"></div></fieldset>
+        <fieldset><legend>Risco BACEN</legend>
+          <div class="row">
+            <label class="opt"><input type="radio" name="bacen" id="bacenNao" value="nao"><span class="k">Não</span></label>
+            <label class="opt"><input type="radio" name="bacen" id="bacenSim" value="sim"><span class="k">Sim</span></label>
+          </div>
+        </fieldset>
+        <fieldset><legend>Confiança</legend>
+          <div class="row">
+            <label class="opt"><input type="radio" name="conf" id="confSeg" value="segura"><span class="k">Segura</span></label>
+            <label class="opt"><input type="radio" name="conf" id="confDuv" value="duvida"><span class="k">Em dúvida</span></label>
+          </div>
+        </fieldset>
+        <fieldset><legend>Observação (opcional)</legend><textarea id="obs" placeholder="Ex.: fala de dois problemas; o principal é a fatura."></textarea></fieldset>
+        <div class="row" style="align-items:center">
+          <button class="b primary" type="submit" id="save">Salvar e avançar</button>
+          <span class="status" id="status" role="status"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const TAX = {"assuntos": {"cartoes_limite": {"curta": "cartão de crédito: limite, bloqueio, perda ou 2ª via do cartão", "descricao": "Cartões e limite de crédito: limite, bloqueio, perda, entrega e 2ª via do cartão físico", "subs": {"aumento_limite": "valor do limite de crédito: pedir aumento, redução ou entender como o limite é definido. Não inclui cartão bloqueado ou recusado (bloqueio_desbloqueio) nem dúvidas sobre a fatura (duvida_fatura)", "bloqueio_desbloqueio": "cartão bloqueado, recusado em compras, perdido, roubado ou com problema para desbloquear, mesmo quando há limite disponível", "segunda_via_cartao": "pedido de 2ª via do cartão físico, cartão não recebido ou danificado"}}, "faturas_cobranca": {"curta": "fatura do cartão: boleto, dúvidas, cobranças e vencimento", "descricao": "Faturas e cobrança do cartão: 2ª via de fatura/boleto, dúvidas, cobranças indevidas e data de vencimento", "subs": {"segunda_via_fatura": "pedido de 2ª via de fatura, boleto ou código de barras/Pix copia e cola para pagamento", "duvida_fatura": "dúvida sobre lançamentos, encargos, juros, parcelamento ou valor mínimo da fatura", "cobranca_errada": "cobrança indevida NA FATURA DO CARTÃO DE CRÉDITO: compra duplicada, anuidade indevida, seguro/assistência não solicitado, compra não reconhecida, estorno não feito. Tarifas debitadas na conta corrente são tarifas_conta; parcelas de empréstimo são emprestimos_financiamentos", "mudanca_data_vencimento": "pedido de alteração da data de vencimento ou de cobrança"}}, "conta_pix": {"curta": "conta corrente e Pix: transferências, chaves e tarifas", "descricao": "Conta corrente e Pix: transferências, chaves, limites Pix, tarifas e acesso à conta", "subs": {"problema_pix": "Pix não recebido, enviado errado, devolução, MED (mecanismo especial de devolução) ou golpe via Pix", "chave_limite_pix": "cadastro/portabilidade de chave Pix e ajuste de limites Pix", "tarifas_conta": "tarifas e pacote de serviços debitados NA CONTA CORRENTE (inclusive tarifas não contratadas), encerramento de conta e cheque especial. Não inclui cobranças na fatura do cartão (cobranca_errada)"}}, "emprestimos_financiamentos": {"curta": "empréstimos e financiamentos: contratação, quitação e dívidas", "descricao": "Empréstimos e financiamentos: contratação, adiantamento/quitação de parcelas e renegociação de dívida", "subs": {"contratacao_emprestimo": "simulação, contratação, consignado, portabilidade de crédito ou dúvida sobre contrato de empréstimo/financiamento", "adiantamento_parcelas": "adiantamento ou quitação antecipada de parcelas de empréstimo/financiamento com desconto de juros", "renegociacao_divida": "renegociação, parcelamento de dívida em atraso, acordo, negativação e cobrança de dívida"}}}, "criticidade": {"normal": "dúvida, consulta ou solicitação rotineira; sem prejuízo ao cliente; resolvida ou resolvível no primeiro contato", "importante": "problema real com algum impacto ao cliente (pequeno valor, transtorno, prazo), tratável no 1º nível ou com protocolo", "grave": "prejuízo financeiro relevante, fraude/golpe, falha sistêmica, cliente vulnerável (idoso, doente, desempregado) prejudicado, reincidência sem solução ou risco de negativação indevida", "BACEN": "cliente já registrou ou ameaça explicitamente registrar reclamação no Banco Central / Ouvidoria / Procon / Justiça, OU o banco se recusa a cumprir um direito regulatório na própria ligação (negar desconto proporcional em quitação antecipada, dificultar encerramento de conta ou portabilidade, não cumprir o MED do Pix). Uma cobrança indevida, por si só, NÃO é BACEN: é importante ou grave conforme o prejuízo"}};
+const NIVEIS = ["normal", "importante", "grave", "BACEN"];
+const COR = { normal: "var(--ok)", importante: "var(--warn)", grave: "var(--bad)", BACEN: "var(--reg)" };
+const ROTULO_A = { cartoes_limite: "Cartão e limite", faturas_cobranca: "Fatura e cobrança", conta_pix: "Conta e Pix", emprestimos_financiamentos: "Empréstimo e financiamento", fora: "Fora da taxonomia" };
+const nome = s => s.replace(/_/g, " ").replace(/^./, c => c.toUpperCase());
+const $ = id => document.getElementById(id);
+
+let itens = [], minhas = {}, cur = 0, db = null, uid = null, meuDoc = null, docExiste = false, podeEscrever = true;
+
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]); }
+function marcar(t) { return esc(t).replace(/\[(MASCARADO|DATA|NOME|URL|ORGANIZACAO|CPF|EMAIL|TELEFONE)\]/g, '<span class="m">$1</span>'); }
+
+function opt(name, value, title, desc, key) {
+  return `<label class="opt"><input type="radio" name="${name}" value="${value}" id="${name}-${value}"><span class="k">${esc(title)}${key ? `<kbd>${key}</kbd>` : ""}</span>${desc ? `<span class="d">${esc(desc)}</span>` : ""}</label>`;
+}
+
+function montarFixos() {
+  const as = Object.keys(TAX.assuntos);
+  $("fsAssunto").insertAdjacentHTML("beforeend",
+    as.map((a, i) => opt("assunto", a, ROTULO_A[a], TAX.assuntos[a].descricao, i + 1)).join("") +
+    opt("assunto", "fora", ROTULO_A.fora, "Nenhum dos quatro assuntos descreve a reclamação.", 5));
+  $("fsCrit").innerHTML = NIVEIS.map(n =>
+    `<label class="opt" title="${esc(TAX.criticidade[n])}"><input type="radio" name="crit" value="${n}" id="crit-${n}"><span class="k"><span class="sw" style="background:${COR[n]}"></span>${n === "BACEN" ? "BACEN" : nome(n)}</span></label>`).join("");
+  $("fsCrit").insertAdjacentHTML("afterend", `<p class="d" id="critDef" style="margin:4px 0 0;font-size:.82rem;color:var(--muted)"></p>`);
+  $("fsAssunto").addEventListener("change", () => montarSub(null));
+  $("fsCrit").addEventListener("change", e => { $("critDef").textContent = TAX.criticidade[e.target.value] || ""; });
+}
+
+function montarSub(valor) {
+  const a = (document.querySelector('input[name="assunto"]:checked') || {}).value;
+  const fs = $("fsSub");
+  fs.querySelectorAll(".opt, .d").forEach(n => n.remove());
+  if (!a) { fs.insertAdjacentHTML("beforeend", `<p class="d" style="margin:0;color:var(--muted);font-size:.85rem">Escolha o assunto primeiro.</p>`); return; }
+  if (a === "fora") { fs.insertAdjacentHTML("beforeend", `<p class="d" style="margin:0;color:var(--muted);font-size:.85rem">Sem sub-assunto para reclamações fora da taxonomia.</p>`); return; }
+  const subs = TAX.assuntos[a].subs;
+  fs.insertAdjacentHTML("beforeend", Object.keys(subs).map(s => opt("sub", s, nome(s), subs[s])).join("") +
+    opt("sub", "nenhum", "Nenhum se aplica", "O assunto está certo, mas nenhum sub-assunto descreve o problema."));
+  if (valor) { const el = $("sub-" + valor); if (el) el.checked = true; }
+}
+
+function render() {
+  if (!itens.length) return;
+  const it = itens[cur], a = minhas[it.id];
+  $("pos").textContent = `Reclamação ${it.n} de ${itens.length}`;
+  $("len").textContent = `${it.texto.length} caracteres`;
+  $("texto").innerHTML = marcar(it.texto);
+  $("ficha").reset();
+  $("critDef").textContent = "";
+  if (a) {
+    const set = (id) => { const el = $(id); if (el) el.checked = true; };
+    set("assunto-" + a.assunto); montarSub(a.sub); set("crit-" + a.crit);
+    set(a.bacen ? "bacenSim" : "bacenNao"); set(a.duvida ? "confDuv" : "confSeg");
+    $("obs").value = a.obs || "";
+    $("critDef").textContent = TAX.criticidade[a.crit] || "";
+  } else { montarSub(null); $("confSeg").checked = true; }
+  $("prev").disabled = cur === 0; $("next").disabled = cur === itens.length - 1;
+  renderMapa();
+}
+
+function renderMapa() {
+  const feitas = itens.filter(i => minhas[i.id]).length;
+  $("count").innerHTML = `<b>${feitas}</b> de ${itens.length} rotuladas`;
+  $("map").innerHTML = itens.map((i, k) => {
+    const a = minhas[i.id];
+    const cls = [a ? (a.duvida ? "doubt" : "done") : "", k === cur ? "cur" : ""].join(" ");
+    return `<button type="button" class="${cls}" data-k="${k}" aria-label="Reclamação ${i.n}${a ? ", rotulada" : ""}" title="${i.n}"></button>`;
+  }).join("");
+}
+
+function status(msg, err) { const s = $("status"); s.textContent = msg; s.classList.toggle("err", !!err); }
+
+async function salvar(e) {
+  e.preventDefault();
+  const v = n => (document.querySelector(`input[name="${n}"]:checked`) || {}).value;
+  const assunto = v("assunto"), sub = assunto === "fora" ? "fora" : v("sub"), crit = v("crit"), bacen = v("bacen");
+  const falta = [!assunto && "assunto", !sub && "sub-assunto", !crit && "criticidade", !bacen && "risco BACEN"].filter(Boolean);
+  if (falta.length) { status("Falta marcar: " + falta.join(", ") + ".", true); return; }
+  if (!podeEscrever || !meuDoc) { status("Você está com acesso só de leitura: peça ao dono para te dar acesso de Contributor.", true); return; }
+  const it = itens[cur];
+  const reg = { assunto, sub, crit, bacen: bacen === "sim", duvida: v("conf") === "duvida", obs: $("obs").value.trim(), quando: new Date().toISOString() };
+  $("save").disabled = true; status("Salvando…");
+  try {
+    if (docExiste) await meuDoc.update({ itens: { [it.id]: reg } });
+    else { await meuDoc.set({ itens: { ...minhas, [it.id]: reg } }); docExiste = true; }
+    minhas = { ...minhas, [it.id]: reg };
+    status(`Reclamação ${it.n} salva.`);
+    irProxima(true);
+  } catch (err) {
+    if (err && err.code === "invalid_argument") { podeEscrever = false; status("Não foi possível salvar: seu acesso é só de leitura.", true); }
+    else if (err && err.code === "quota_exceeded") status("O banco da página está cheio. Avise o dono da auditoria.", true);
+    else status("Não foi possível salvar agora. Tente de novo em alguns segundos.", true);
+  } finally { $("save").disabled = false; }
+}
+
+function irProxima(soFazer) {
+  if (soFazer) {
+    for (let k = 1; k <= itens.length; k++) { const j = (cur + k) % itens.length; if (!minhas[itens[j].id]) { cur = j; render(); return; } }
+    status("Todas as 200 estão rotuladas. Obrigado!"); renderMapa(); return;
+  }
+  if (cur < itens.length - 1) { cur++; render(); }
+}
+
+function ligarEventos() {
+  $("ficha").addEventListener("submit", salvar);
+  $("prev").onclick = () => { if (cur > 0) { cur--; render(); } };
+  $("next").onclick = () => irProxima(false);
+  $("nextTodo").onclick = () => irProxima(true);
+  $("map").addEventListener("click", e => { const b = e.target.closest("button[data-k]"); if (b) { cur = +b.dataset.k; render(); } });
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey || !itens.length) return;
+    if (/^[1-5]$/.test(e.key)) {
+      const v = [...Object.keys(TAX.assuntos), "fora"][+e.key - 1];
+      const el = $("assunto-" + v); el.checked = true; montarSub(null); e.preventDefault();
+    } else if (e.key === "ArrowRight") { irProxima(false); e.preventDefault(); }
+    else if (e.key === "ArrowLeft" && cur > 0) { cur--; render(); e.preventDefault(); }
+    else if (e.key === "Enter" && e.target.tagName !== "BUTTON") { $("ficha").requestSubmit(); e.preventDefault(); }
+  });
+}
+
+async function iniciar() {
+  montarFixos(); ligarEventos();
+  const timer = setTimeout(() => { $("empty").textContent = "As reclamações ainda não chegaram. Verifique a conexão; a página continua tentando."; }, 10000);
+  db = await claude.use("db");
+  const user = await claude.use("user");
+  if (!db) { clearTimeout(timer); $("empty").textContent = "Abra esta página em claude.ai, conectado à sua conta, para ver e rotular as reclamações."; return; }
+  uid = user ? await user.id() : null;
+  const pode = user ? await user.can("data.write") : null;
+  if (pode === false) podeEscrever = false;
+  if (uid) meuDoc = db.doc("anotacoes/" + uid);
+
+  db.collection("itens").orderBy("n").limit(1000).onSnapshot(snap => {
+    if (!snap.metadata.fromCache) clearTimeout(timer);
+    itens = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!itens.length) { $("empty").textContent = "Nenhuma reclamação carregada ainda."; $("empty").hidden = false; $("desk").hidden = true; return; }
+    $("empty").hidden = true; $("desk").hidden = false;
+    if (cur >= itens.length) cur = 0;
+    render();
+  }, () => { clearTimeout(timer); $("empty").textContent = "Não foi possível ler as reclamações. Recarregue a página mais tarde."; });
+
+  if (meuDoc) {
+    const s = await meuDoc.get().catch(() => null);
+    if (s && s.exists) { docExiste = true; minhas = { ...(s.data().itens || {}) }; }
+    if (itens.length) {
+      const j = itens.findIndex(i => !minhas[i.id]); if (j >= 0) cur = j;
+      render();
+    }
+    if (Object.keys(minhas).length) $("proto").open = false;
+  } else {
+    podeEscrever = false;
+  }
+  if (!podeEscrever) status("Acesso só de leitura: você pode ler, mas não salvar.", true);
+}
+iniciar();
+</script>
