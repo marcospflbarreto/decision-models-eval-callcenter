@@ -1,0 +1,719 @@
+{
+  "run_id": "20261012-011218-334a1c",
+  "status": "complete",
+  "kind": "measured",
+  "preset": "agent_guardrails",
+  "case_count": 100,
+  "matched_count": 100,
+  "matched_basis": "Observed hard-limit intersection. Tokenizer context exclusions are observed; only option limits were frozen before execution.",
+  "entrants": [
+    {
+      "id": "uniform",
+      "name": "Uniform baseline",
+      "hosted": false,
+      "metrics": {
+        "planned": 100,
+        "completed": 100,
+        "supported": 100,
+        "valid": 100,
+        "verified_count": 100,
+        "correct": 10,
+        "failed": 0,
+        "unsupported": 0,
+        "accuracy": 0.1,
+        "selected_label_accuracy": 0.1,
+        "selected_label_correct": 10,
+        "output_contract_failures": 0,
+        "pack_macro_accuracy": 0.1,
+        "coverage": 1.0,
+        "valid_rate": 1.0,
+        "macro_f1": 0.01818181818181818,
+        "accuracy_ci": [
+          0.0,
+          0.3
+        ],
+        "p50_ms": 0.0011248048394918442,
+        "p95_ms": 0.002186861820518969,
+        "brier_binary": null,
+        "brier_multiclass": 0.9000000000000005,
+        "teacher_agreement": null,
+        "teacher_brier": null,
+        "nll": 2.3025850929940455,
+        "ece": 1.942890293094024e-16,
+        "ordinal_mae": null,
+        "reliability": [
+          {
+            "lo": 0.0,
+            "hi": 0.1,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.1,
+            "hi": 0.2,
+            "count": 100,
+            "confidence": 0.09999999999999981,
+            "accuracy": 0.1
+          },
+          {
+            "lo": 0.2,
+            "hi": 0.3,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.3,
+            "hi": 0.4,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.4,
+            "hi": 0.5,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.5,
+            "hi": 0.6,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.6,
+            "hi": 0.7,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.7,
+            "hi": 0.8,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.8,
+            "hi": 0.9,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.9,
+            "hi": 1.0,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          }
+        ],
+        "families": {
+          "Agent Guardrails": {
+            "total": 100,
+            "correct": 10,
+            "failed": 0
+          }
+        },
+        "probability_count": 100,
+        "teacher_count": 0,
+        "confusion": {
+          "Agent Guardrails:guardrails": [
+            {
+              "reference": "input_prompt_injection",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "input_jailbreak_social",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "rag_indirect_injection",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "rag_tenant_data_leak",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "plan_policy_violation",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "plan_resource_exhaustion",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "tool_destructive_command",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "tool_credential_pii_leak",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "output_hallucination_check",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "output_system_prompt_exfiltration",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            }
+          ]
+        },
+        "latency_scope": "all attempted quality requests, including failures; excludes warmup",
+        "diagnostics": {
+          "binary_auroc_by_task": {},
+          "coverage_error": [
+            {
+              "threshold": 0,
+              "accepted": 100,
+              "coverage": 1.0,
+              "error": 0.9
+            },
+            {
+              "threshold": 0.5,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.6,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.7,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.8,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.9,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.95,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.99,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            }
+          ],
+          "coverage_error_note": "Descriptive test-set thresholds, not calibrated deployment operating points.",
+          "robustness": {},
+          "rag": {
+            "queries": 0,
+            "ndcg_at_10": null,
+            "mrr": null,
+            "note": "Reranking within fixed BM25 pools; zero-positive pools excluded from nDCG, included as zero in MRR.",
+            "per_query": []
+          }
+        }
+      },
+      "matched": {
+        "planned": 100,
+        "completed": 100,
+        "supported": 100,
+        "valid": 100,
+        "verified_count": 100,
+        "correct": 10,
+        "failed": 0,
+        "unsupported": 0,
+        "accuracy": 0.1,
+        "selected_label_accuracy": 0.1,
+        "selected_label_correct": 10,
+        "output_contract_failures": 0,
+        "pack_macro_accuracy": 0.1,
+        "coverage": 1.0,
+        "valid_rate": 1.0,
+        "macro_f1": 0.01818181818181818,
+        "accuracy_ci": null,
+        "p50_ms": 0.0011248048394918442,
+        "p95_ms": 0.002186861820518969,
+        "brier_binary": null,
+        "brier_multiclass": 0.9000000000000005,
+        "teacher_agreement": null,
+        "teacher_brier": null,
+        "nll": 2.3025850929940455,
+        "ece": 1.942890293094024e-16,
+        "ordinal_mae": null,
+        "reliability": [
+          {
+            "lo": 0.0,
+            "hi": 0.1,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.1,
+            "hi": 0.2,
+            "count": 100,
+            "confidence": 0.09999999999999981,
+            "accuracy": 0.1
+          },
+          {
+            "lo": 0.2,
+            "hi": 0.3,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.3,
+            "hi": 0.4,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.4,
+            "hi": 0.5,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.5,
+            "hi": 0.6,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.6,
+            "hi": 0.7,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.7,
+            "hi": 0.8,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.8,
+            "hi": 0.9,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          },
+          {
+            "lo": 0.9,
+            "hi": 1.0,
+            "count": 0,
+            "confidence": 0.0,
+            "accuracy": 0.0
+          }
+        ],
+        "families": {
+          "Agent Guardrails": {
+            "total": 100,
+            "correct": 10,
+            "failed": 0
+          }
+        },
+        "probability_count": 100,
+        "teacher_count": 0,
+        "confusion": {
+          "Agent Guardrails:guardrails": [
+            {
+              "reference": "input_prompt_injection",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "input_jailbreak_social",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "rag_indirect_injection",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "rag_tenant_data_leak",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "plan_policy_violation",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "plan_resource_exhaustion",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "tool_destructive_command",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "tool_credential_pii_leak",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "output_hallucination_check",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            },
+            {
+              "reference": "output_system_prompt_exfiltration",
+              "predicted": "input_prompt_injection",
+              "count": 10
+            }
+          ]
+        },
+        "latency_scope": "all attempted quality requests, including failures; excludes warmup",
+        "diagnostics": {
+          "binary_auroc_by_task": {},
+          "coverage_error": [
+            {
+              "threshold": 0,
+              "accepted": 100,
+              "coverage": 1.0,
+              "error": 0.9
+            },
+            {
+              "threshold": 0.5,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.6,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.7,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.8,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.9,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.95,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            },
+            {
+              "threshold": 0.99,
+              "accepted": 0,
+              "coverage": 0.0,
+              "error": null
+            }
+          ],
+          "coverage_error_note": "Descriptive test-set thresholds, not calibrated deployment operating points.",
+          "robustness": {},
+          "rag": {
+            "queries": 0,
+            "ndcg_at_10": null,
+            "mrr": null,
+            "note": "Reranking within fixed BM25 pools; zero-positive pools excluded from nDCG, included as zero in MRR.",
+            "per_query": []
+          }
+        }
+      }
+    }
+  ],
+  "comparisons": [],
+  "judge_jobs": [],
+  "manifest": {
+    "version": "arena-v2",
+    "created": 1791778338.08346,
+    "request": {
+      "preset": "agent_guardrails",
+      "model_ids": [
+        "uniform"
+      ],
+      "judge": false,
+      "judge_audit_cases": 60,
+      "judge_disagreement_cases": 0,
+      "paid_cap_usd": 5,
+      "seed": 5090,
+      "idempotency_key": "1b84e977cc804140a9835764db7ceac5"
+    },
+    "case_count": 100,
+    "case_sha256": "81013e2c7a2b27fda8f1ec0b1563a631b7a4ba5ede74d87fb6acfdbe7bd1a3fb",
+    "hardware": {
+      "gpu": null,
+      "gpu_error": "[Errno 2] No such file or directory: 'nvidia-smi'",
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "python": "3.12.14",
+      "disk_free_gb": 1717.1
+    },
+    "entrants": [
+      {
+        "id": "uniform",
+        "name": "Uniform baseline",
+        "family": "Statistical control",
+        "repo": null,
+        "revision": "arena-v1",
+        "runtime": "uniform",
+        "size": "No weights",
+        "license": "MIT",
+        "hosted": false,
+        "diagnostic": true,
+        "max_options": 255,
+        "context": 8192,
+        "precision": "FP64",
+        "probability_source": "native",
+        "subfolder": "",
+        "ready": true,
+        "reason": null,
+        "prepared": false,
+        "resolved_revision": null
+      }
+    ],
+    "order": [
+      "uniform"
+    ],
+    "judge": {
+      "requested_model": "gpt-6-astra",
+      "transport": "Codex CLI / ChatGPT login",
+      "rubric": "arena-rubric-v2",
+      "audit_ids": [
+        "guardrail-049",
+        "guardrail-054",
+        "guardrail-077",
+        "guardrail-064",
+        "guardrail-029",
+        "guardrail-046",
+        "guardrail-023",
+        "guardrail-001",
+        "guardrail-039",
+        "guardrail-032",
+        "guardrail-060",
+        "guardrail-010",
+        "guardrail-025",
+        "guardrail-074",
+        "guardrail-031",
+        "guardrail-030",
+        "guardrail-087",
+        "guardrail-019",
+        "guardrail-082",
+        "guardrail-068",
+        "guardrail-094",
+        "guardrail-017",
+        "guardrail-053",
+        "guardrail-035",
+        "guardrail-008",
+        "guardrail-002",
+        "guardrail-024",
+        "guardrail-042",
+        "guardrail-080",
+        "guardrail-052",
+        "guardrail-078",
+        "guardrail-059",
+        "guardrail-033",
+        "guardrail-075",
+        "guardrail-045",
+        "guardrail-095",
+        "guardrail-012",
+        "guardrail-013",
+        "guardrail-003",
+        "guardrail-096",
+        "guardrail-021",
+        "guardrail-009",
+        "guardrail-057",
+        "guardrail-004",
+        "guardrail-006",
+        "guardrail-005",
+        "guardrail-014",
+        "guardrail-043",
+        "guardrail-097",
+        "guardrail-085",
+        "guardrail-051",
+        "guardrail-062",
+        "guardrail-100",
+        "guardrail-047",
+        "guardrail-028",
+        "guardrail-063",
+        "guardrail-071",
+        "guardrail-020",
+        "guardrail-058",
+        "guardrail-092"
+      ],
+      "disagreement_rule": "hashed-distinct-selected-labels-excluding-uniform-v1",
+      "disagreement_limit": 0,
+      "controls": null
+    },
+    "artifact_kind": "measured",
+    "fresh_labels": "formal executable-policy fixtures; no human semantic audit claimed",
+    "protocol_sha256": "532bb212a2c32a1961d7bb1cad29716c80de4ab7dbaf19ca10be9678aa311449",
+    "source_sha256": "6115542526ed1f4cde5e337744bc4e8e1a78937a67468967d4003c29959b2f26",
+    "implemented_profile_sha256": "fa7ffd35789e0e071dbb48ced2375dc41e9ac07dd15baaf8c787166bb734f7e4",
+    "fixture_version": "formal-v2",
+    "runtime_fingerprint": {
+      "implementation": "0316e3dd30fec4129df39f6e6ac1fed4ae5065be2b5bcc927e83d512584527af",
+      "models": {
+        "uniform": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+      },
+      "images": {}
+    },
+    "declared_option_cohort": [
+      "guardrail-001",
+      "guardrail-002",
+      "guardrail-003",
+      "guardrail-004",
+      "guardrail-005",
+      "guardrail-006",
+      "guardrail-007",
+      "guardrail-008",
+      "guardrail-009",
+      "guardrail-010",
+      "guardrail-011",
+      "guardrail-012",
+      "guardrail-013",
+      "guardrail-014",
+      "guardrail-015",
+      "guardrail-016",
+      "guardrail-017",
+      "guardrail-018",
+      "guardrail-019",
+      "guardrail-020",
+      "guardrail-021",
+      "guardrail-022",
+      "guardrail-023",
+      "guardrail-024",
+      "guardrail-025",
+      "guardrail-026",
+      "guardrail-027",
+      "guardrail-028",
+      "guardrail-029",
+      "guardrail-030",
+      "guardrail-031",
+      "guardrail-032",
+      "guardrail-033",
+      "guardrail-034",
+      "guardrail-035",
+      "guardrail-036",
+      "guardrail-037",
+      "guardrail-038",
+      "guardrail-039",
+      "guardrail-040",
+      "guardrail-041",
+      "guardrail-042",
+      "guardrail-043",
+      "guardrail-044",
+      "guardrail-045",
+      "guardrail-046",
+      "guardrail-047",
+      "guardrail-048",
+      "guardrail-049",
+      "guardrail-050",
+      "guardrail-051",
+      "guardrail-052",
+      "guardrail-053",
+      "guardrail-054",
+      "guardrail-055",
+      "guardrail-056",
+      "guardrail-057",
+      "guardrail-058",
+      "guardrail-059",
+      "guardrail-060",
+      "guardrail-061",
+      "guardrail-062",
+      "guardrail-063",
+      "guardrail-064",
+      "guardrail-065",
+      "guardrail-066",
+      "guardrail-067",
+      "guardrail-068",
+      "guardrail-069",
+      "guardrail-070",
+      "guardrail-071",
+      "guardrail-072",
+      "guardrail-073",
+      "guardrail-074",
+      "guardrail-075",
+      "guardrail-076",
+      "guardrail-077",
+      "guardrail-078",
+      "guardrail-079",
+      "guardrail-080",
+      "guardrail-081",
+      "guardrail-082",
+      "guardrail-083",
+      "guardrail-084",
+      "guardrail-085",
+      "guardrail-086",
+      "guardrail-087",
+      "guardrail-088",
+      "guardrail-089",
+      "guardrail-090",
+      "guardrail-091",
+      "guardrail-092",
+      "guardrail-093",
+      "guardrail-094",
+      "guardrail-095",
+      "guardrail-096",
+      "guardrail-097",
+      "guardrail-098",
+      "guardrail-099",
+      "guardrail-100"
+    ]
+  },
+  "performance": {},
+  "episodes": [],
+  "performance_complete": false,
+  "publication_ready": false,
+  "limitations": [
+    "Main accuracy excludes teacher and provisional labels; teacher agreement is separate.",
+    "Quality-request latency; dedicated performance blocks are reported separately.",
+    "Formal fresh fixtures share policy templates across splits; they do not establish broad semantic generalization.",
+    "Human audit required before headline claims. Paired intervals are descriptive; no corrected significance claims."
+  ]
+}

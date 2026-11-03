@@ -3,6 +3,8 @@
 Gera conversas sintéticas **já rotuladas** de um call center bancário, para treinar e avaliar
 decision models (Laya) contra o benchmark Jev.
 
+**Relatório consolidado:** [marcospflbarreto.github.io/decision-models-eval-callcenter](https://marcospflbarreto.github.io/decision-models-eval-callcenter/) ([docs/index.html](docs/index.html)) reúne os resultados deste projeto e os do Jev Arena (13 decision models, ABCD e os pilotos em português), copiados em [docs/jev-arena](docs/jev-arena/README.md).
+
 Cada conversa tem quatro rótulos:
 
 | Pergunta (Laya) | Tipo | Valores |

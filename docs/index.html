@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decision Models: Achados</title>
+<meta name="description" content="Relatório consolidado: Laya no call center bancário e os resultados do Jev Arena (Full v2, ABCD e pilotos).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Relatório consolidado: barra lateral fixa com o sumário (≥ 1000px) e coluna de leitura de ~72ch. Mesmos tokens do relatorio-aprendizados.html. */
+:root {
+  --bg: #f6f7fa; --surface: #ffffff; --ink: #18202e; --muted: #5a6478; --line: #dde1ea;
+  --laya: #3446c8; --laya-soft: #e6e9fb;
+  --tfidf: #b06d12; --tfidf-soft: #f8ecd9;
+  --jev: #0f7f86; --jev-soft: #dcf1f2;
+  --base: #8a93a6;
+  --good: #1d7a4c; --good-soft: #dff2e8;
+  --bad: #b3362b; --bad-soft: #f9e2df;
+  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151d; --surface: #181e29; --ink: #e6e9f0; --muted: #9aa3b5; --line: #2b3342;
+    --laya: #8b98f5; --laya-soft: #232b52; --tfidf: #e3a650; --tfidf-soft: #3a2c17;
+    --jev: #4fc3c9; --jev-soft: #143436; --base: #7d869a;
+    --good: #5cc48f; --good-soft: #17352a; --bad: #f08479; --bad-soft: #3d1f1c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151d; --surface: #181e29; --ink: #e6e9f0; --muted: #9aa3b5; --line: #2b3342;
+  --laya: #8b98f5; --laya-soft: #232b52; --tfidf: #e3a650; --tfidf-soft: #3a2c17;
+  --jev: #4fc3c9; --jev-soft: #143436; --base: #7d869a;
+  --good: #5cc48f; --good-soft: #17352a; --bad: #f08479; --bad-soft: #3d1f1c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16.5px; line-height: 1.6;
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.1rem; font-weight: 700; }
+p { margin: 0; max-width: 70ch; }
+ul, ol { margin: 0; padding-left: 1.2em; max-width: 70ch; }
+li + li { margin-top: 4px; }
+a { color: var(--laya); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--laya); outline-offset: 2px; border-radius: 2px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+
+/* Estrutura */
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1180px; margin: 0 auto; }
+@media (min-width: 1000px) { .layout { grid-template-columns: 250px minmax(0, 1fr); gap: 48px; padding-inline: 24px; } }
+main { min-width: 0; padding: 32px max(16px, env(safe-area-inset-right, 0px)) 96px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 64px; }
+@media (min-width: 1000px) { main { padding-inline: 0; padding-top: 48px; max-width: 820px; } }
+section { display: grid; gap: 18px; min-width: 0; }
+.part { display: grid; gap: 48px; }
+.part-head { border-top: 3px solid var(--ink); padding-top: 14px; display: grid; gap: 8px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.15rem; color: var(--muted); }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--muted); font-family: var(--font-mono); }
+.note { font-size: 0.88rem; color: var(--muted); }
+
+/* Navegação */
+.sidenav { display: none; }
+@media (min-width: 1000px) {
+  .sidenav { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 48px 0 32px; }
+}
+.sidenav .brand { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; margin-bottom: 18px; display: block; color: var(--ink); text-decoration: none; }
+.sidenav .group { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 6px; }
+.sidenav a.l { display: block; font-size: 0.88rem; color: var(--muted); text-decoration: none; padding: 3px 0 3px 12px; border-left: 2px solid var(--line); line-height: 1.35; }
+.sidenav a.l:hover { color: var(--ink); }
+.sidenav a.l.active { color: var(--ink); border-left-color: var(--laya); font-weight: 600; }
+.topnav { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; scrollbar-width: none; }
+.topnav::-webkit-scrollbar { display: none; }
+.topnav a { flex: none; font-size: 0.82rem; text-decoration: none; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 3px 12px; background: var(--surface); }
+.topnav a.active { border-color: var(--laya); color: var(--laya); }
+@media (min-width: 1000px) { .topnav { display: none; } }
+
+/* Achados */
+.findings { display: grid; border-top: 2px solid var(--ink); }
+.finding { display: grid; grid-template-columns: 10.5rem 1fr; gap: 18px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.finding .num { font-family: var(--font-display); font-weight: 800; font-size: 1.55rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.finding .num small { display: block; font-family: var(--font-mono); font-weight: 400; font-size: 0.68rem; color: var(--muted); margin-top: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+.finding p { min-width: 0; }
+.tag { display: inline-block; font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; margin-right: 6px; vertical-align: 2px; }
+.tag.nosso { background: var(--laya-soft); color: var(--laya); }
+.tag.arena { background: var(--jev-soft); color: var(--jev); }
+@media (max-width: 560px) { .finding { grid-template-columns: 1fr; gap: 6px; } }
+
+/* Cartões */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.card b { font-family: var(--font-display); }
+.card span { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+.card a { font-size: 0.9rem; }
+.callout { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--laya); border-radius: 6px; padding: 14px 16px; display: grid; gap: 8px; }
+.callout.warn { border-left-color: var(--tfidf); }
+.callout.jev { border-left-color: var(--jev); }
+
+/* Tabelas */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.hl td { background: var(--laya-soft); }
+tr.jv td { background: var(--jev-soft); }
+
+/* Gráficos de barras */
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 10px; }
+.chart h3 { font-size: 0.98rem; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: minmax(7rem, 11rem) 1fr 4.6rem; gap: 10px; align-items: center; font-size: 0.86rem; }
+.bar .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { position: relative; height: 16px; background: var(--bg); border-radius: 3px; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--base); }
+.bar .ci { position: absolute; top: 50%; height: 2px; background: var(--ink); opacity: 0.55; transform: translateY(-50%); }
+.bar .ci::before, .bar .ci::after { content: ""; position: absolute; top: -4px; width: 1px; height: 10px; background: var(--ink); }
+.bar .ci::before { left: 0; } .bar .ci::after { right: 0; }
+.bar .val { text-align: right; font-family: var(--font-mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.fill.laya { background: var(--laya); } .fill.tfidf { background: var(--tfidf); } .fill.jev { background: var(--jev); } .fill.base { background: var(--base); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.8rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.group-label { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 6px; }
+@media (max-width: 560px) { .bar { grid-template-columns: 6.5rem 1fr 3.8rem; gap: 8px; font-size: 0.8rem; } }
+
+footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85rem; color: var(--muted); display: grid; gap: 6px; }
+</style>
+</head>
+<body>
+<nav class="topnav" id="topnav" aria-label="Seções"></nav>
+<div class="layout">
+<aside class="sidenav" aria-label="Sumário">
+  <a class="brand" href="#inicio">Decision Models</a>
+  <div class="group">Visão geral</div>
+  <a class="l" href="#inicio">Início</a>
+  <a class="l" href="#achados">Principais achados</a>
+  <a class="l" href="#mapa">O que foi medido</a>
+  <div class="group">Parte A · Nosso projeto</div>
+  <a class="l" href="#a-dados">Dados sintéticos</a>
+  <a class="l" href="#a-teste1">Teste 1: cenários conhecidos</a>
+  <a class="l" href="#a-teste2">Teste 2: cenários novos</a>
+  <a class="l" href="#a-real">Teste 3: reclamações reais</a>
+  <div class="group">Parte B · Jev Arena</div>
+  <a class="l" href="#b-full">Full v2: 13 perfis</a>
+  <a class="l" href="#b-validade">Cobertura e formato</a>
+  <a class="l" href="#b-velocidade">Velocidade</a>
+  <a class="l" href="#b-fluxos">Fluxos e repetição</a>
+  <a class="l" href="#b-tarefas">Análise por tarefa</a>
+  <a class="l" href="#b-abcd">ABCD: próximo passo</a>
+  <a class="l" href="#b-auditoria">Auditoria e custo</a>
+  <a class="l" href="#b-pilotos">Pilotos em português</a>
+  <div class="group">Parte C · Síntese</div>
+  <a class="l" href="#c-implicacoes">O que muda para nós</a>
+  <a class="l" href="#c-limites">Limitações</a>
+  <a class="l" href="#c-proximos">Próximos passos</a>
+  <a class="l" href="#c-docs">Documentos e evidências</a>
+</aside>
+
+<main>
+<header id="inicio" style="display:grid;gap:16px">
+  <div class="eyebrow">Relatório consolidado · Decision models</div>
+  <h1>Decision models no call center bancário: tudo o que medimos</h1>
+  <p class="lede">Junta dois estudos. O nosso treina o Laya, um decision model aberto, para classificar ligações por assunto, sub-assunto e criticidade. O Jev Arena compara 13 decision models, incluindo o Jev e o Laya, em 7.671 casos públicos e num teste de atendimento ao cliente (ABCD).</p>
+  <div class="meta"><span>3 nov 2026</span><span>Nosso projeto: Mac M5 Max, 64 GB</span><span>Jev Arena: Windows, RTX 5090</span></div>
+  <div class="legend"><span><span class="tag nosso">nosso</span>medido neste repositório</span><span><span class="tag arena">arena</span>medido no Jev Arena (projeto jev-open)</span></div>
+</header>
+
+<section id="achados">
+  <div class="eyebrow">Resumo</div>
+  <h2>Oito achados</h2>
+  <div class="findings">
+    <div class="finding"><div class="num">95,2%<small>Jev, rótulos iguais</small></div><p><span class="tag arena">arena</span>Nas mesmas 4.635 questões com gabarito, o Jev lidera (95,2%), mas três modelos locais ficam a menos de 3 p.p.: Winnow 94,6%, Decider 94,5%, Nimble 92,3%. Não há vencedor universal.</p></div>
+    <div class="finding"><div class="num">56–65%<small>Laya sem fine-tuning</small></div><p><span class="tag arena">arena</span>As três versões do Laya sem treino específico ficam entre 56% e 65% na mesma comparação. O multilíngue, que é a base do nosso modelo, fica em 56,3%. O Arena não testou nenhum Laya ajustado à tarefa.</p></div>
+    <div class="finding"><div class="num">23% → 84%<small>sub-assunto, nosso Laya</small></div><p><span class="tag nosso">nosso</span>Com fine-tuning em 539 conversas sintéticas, o Laya multilíngue vai de 23% para 84% no sub-assunto, em cenários que nunca viu (média de 3 seeds). O TF-IDF chega a 82%, um empate estatístico.</p></div>
+    <div class="finding"><div class="num">48%<small>sub-assunto, texto real</small></div><p><span class="tag nosso">nosso</span>Em 1.650 reclamações reais do consumidor.gov.br, o sub-assunto cai para 48% e o assunto para 68%. O TF-IDF empata de novo (48% e 67%). O Laya está mal calibrado nesse texto: ECE de 24%, contra 4% do TF-IDF.</p></div>
+    <div class="finding"><div class="num">70% vs 82%<small>criticidade, Laya vs TF-IDF</small></div><p><span class="tag nosso">nosso</span>A criticidade é o ponto fraco do Laya: ele rebaixa casos graves (recall de grave ou BACEN de 76%, contra 93% do TF-IDF). O BACEN é detectado pelos dois em todos os 14 casos.</p></div>
+    <div class="finding"><div class="num">~15 ms<small>Laya, por pedido</small></div><p><span class="tag arena">arena</span>O Laya é o modelo mais rápido do Arena (14–18 ms por pedido), contra ~245 ms do Jev hospedado. No nosso Mac, o Laya leva ~29 ms por conversa.</p></div>
+    <div class="finding"><div class="num">77 opções<small>limite de capacidade</small></div><p><span class="tag arena">arena</span>Com 77 opções de uma vez (BANKING77), o Plumb e o SemIf não aceitam a pergunta e o Winnow falha (limite de 64). Isso confirma a nossa escolha de classificar em dois passos: primeiro o assunto, depois o sub-assunto.</p></div>
+    <div class="finding"><div class="num">0<small>modelos reais no piloto</small></div><p><span class="tag arena">arena</span>A suíte de call center bancário em português (100 casos, 10 departamentos) e a de guardrails foram criadas no Arena, mas só rodaram com o baseline uniforme. O Jev ainda não foi avaliado em dados de call center bancário.</p></div>
+  </div>
+</section>
+
+<section id="mapa">
+  <div class="eyebrow">Escopo</div>
+  <h2>O que foi medido, e onde</h2>
+  <p>Os dois estudos não são comparáveis número a número: a tarefa, o hardware e o gabarito são outros. O que eles têm em comum é o Laya multilíngue (mmBERT, 322M), avaliado sem treino no Arena e ajustado por nós.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Avaliação</th><th>Tarefa</th><th>Modelos</th><th class="n">Casos</th><th>Gabarito</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag nosso">nosso</span>Teste 1</td><td>Assunto, sub-assunto, criticidade, BACEN</td><td>Laya ajustado, Laya base, TF-IDF</td><td class="n">75</td><td>Sintético, por construção</td></tr>
+      <tr><td><span class="tag nosso">nosso</span>Teste 2</td><td>Idem, com cenários inéditos</td><td>Laya (3 seeds), TF-IDF</td><td class="n">238</td><td>Sintético, por construção</td></tr>
+      <tr><td><span class="tag nosso">nosso</span>Teste 3</td><td>Assunto e sub-assunto em reclamações reais</td><td>5 Laya, TF-IDF</td><td class="n">1.650</td><td>Prata: escolha do consumidor</td></tr>
+      <tr><td><span class="tag arena">arena</span>Full v2</td><td>Classificação, relevância, regras, fluxos</td><td>13 perfis</td><td class="n">7.671 / perfil</td><td>Público + regras geradas</td></tr>
+      <tr><td><span class="tag arena">arena</span>ABCD</td><td>Próximo passo e ação no atendimento</td><td>5 perfis</td><td class="n">2.544 / perfil</td><td>Passos gravados (ASAPP)</td></tr>
+      <tr><td><span class="tag arena">arena</span>Pilotos</td><td>Departamento bancário (PT), guardrails</td><td>Só baseline uniforme</td><td class="n">100 + 100</td><td>Escrito à mão</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ PARTE A ============ -->
+<div class="part">
+<div class="part-head">
+  <div class="eyebrow">Parte A</div>
+  <h2>Nosso projeto: o Laya no call center</h2>
+  <p class="note">Detalhes de método no <a href="relatorio-aprendizados.html">relatório de aprendizados</a> e no <a href="treinamento-laya.html">diagrama de treinamento</a>.</p>
+</div>
+
+<section id="a-dados">
+  <h3>Dados sintéticos: 867 conversas geradas, 777 aprovadas</h3>
+  <p>Um LLM local (gemma4:12b) escreve cada ligação a partir de uma especificação sorteada, e o rótulo nasce dessa especificação. Um segundo LLM (qwen3.8:27b) classifica às cegas, e descartamos as conversas em que os dois discordam. Na primeira versão o juiz concordava com só ~50% das criticidades, por causa de combinações sem sentido (golpe do Pix com criticidade "normal"). Duas correções resolveram: cada cenário declara os níveis em que faz sentido, e a taxonomia v2 tornou as definições disjuntas.</p>
+  <div class="cards">
+    <div class="card"><b>92%</b><span>concordância do juiz no sub-assunto</span></div>
+    <div class="card"><b>75%</b><span>concordância exata na criticidade</span></div>
+    <div class="card"><b>90%</b><span>das conversas mantidas pelo filtro</span></div>
+    <div class="card"><b>570–660 / h</b><span>taxa de geração no M5 Max; ~2 dias para 30 mil</span></div>
+  </div>
+</section>
+
+<section id="a-teste1">
+  <h3>Teste 1 · cenários conhecidos: o fine-tuning funciona, mas o teste é fácil demais</h3>
+  <p>São 75 conversas que o modelo nunca viu, geradas a partir dos mesmos cenários do treino. O Laya ajustado acerta tudo no assunto e no sub-assunto, mas o TF-IDF também. O texto sintético entrega o rótulo pelo vocabulário.</p>
+  <div class="chart" data-chart="t1"></div>
+  <p class="note">Barras: IC 95% de Wilson. Laya ajustado vs base: McNemar p &lt; 10⁻⁹ em todas as métricas. Laya vs TF-IDF: nenhuma diferença significativa. Com só 4 casos BACEN, 100% de recall tem IC de 51% a 100%.</p>
+</section>
+
+<section id="a-teste2">
+  <h3>Teste 2 · cenários novos: melhor no assunto, pior na criticidade</h3>
+  <p>Um cenário inteiro de cada sub-assunto ficou só no teste (238 conversas, 14 BACEN). Treinamos o Laya com três seeds diferentes para medir a variação entre execuções.</p>
+  <div class="chart" data-chart="t2"></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Comparação pareada</th><th class="n">Laya − TF-IDF</th><th class="n">IC 95%</th><th class="n">p (Holm)</th><th>Leitura</th></tr></thead>
+    <tbody>
+      <tr><td>Assunto</td><td class="n">+6 p.p.</td><td class="n">[+1, +11]</td><td class="n">0,06</td><td>tendência a favor do Laya</td></tr>
+      <tr><td>Sub-assunto (2 passos)</td><td class="n">+3 p.p.</td><td class="n">[−5, +9]</td><td class="n">1,0</td><td>empate</td></tr>
+      <tr><td>Criticidade exata</td><td class="n">−12 p.p.</td><td class="n">[−20, −6]</td><td class="n">0,054</td><td>tendência a favor do TF-IDF</td></tr>
+      <tr><td>Decisão BACEN</td><td class="n">0</td><td class="n">[0, 0]</td><td class="n">1,0</td><td>empate (14 de 14)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Calibração: o ECE do assunto no Laya é ótimo (3%, contra 12% do TF-IDF), mas o da criticidade (23%) ainda não serve para abstenção. A temperatura foi ajustada em só 49 itens.</p>
+</section>
+
+<section id="a-real">
+  <h3>Teste 3 · reclamações reais (ConsumerBR): primeiro contato com texto de verdade</h3>
+  <p>Casamos o corpus ConsumerBR, de reclamações anonimizadas do consumidor.gov.br, com os Dados Abertos mensais, que trazem o assunto. São 1.650 reclamações contra bancos, 1.350 delas com sub-assunto. O rótulo é <b>prata</b>: quem escolhe é o consumidor, no formulário. O texto é uma reclamação escrita, não a transcrição de uma ligação, e não traz criticidade nem BACEN.</p>
+  <div class="chart" data-chart="t3"></div>
+  <ul>
+    <li><b>Mudança de domínio forte.</b> O sub-assunto cai de 84% (sintético, cenários novos) para 44–48% em texto real.</li>
+    <li><b>O TF-IDF continua empatado</b> (McNemar p = 1 no assunto e no sub-assunto).</li>
+    <li><b>Ver todos os cenários ajudou.</b> O modelo v1, que viu todos os cenários no treino, supera os três modelos do split por cenário no sub-assunto por 4 p.p. (p_Holm ≤ 0,002).</li>
+    <li><b>O Laya fica superconfiante.</b> O ECE do assunto vai a 22–27%, contra 4% do TF-IDF. Antes de usar a confiança para abstenção, é preciso recalibrar em dados reais.</li>
+    <li><b>Velocidade:</b> 29 ms por conversa no Mac (MPS), contra 1,3 ms do TF-IDF.</li>
+  </ul>
+  <p class="note">A auditoria cega de 200 reclamações (página <a href="auditoria-consumerbr.html">Auditoria ConsumerBR</a>, que só funciona em claude.ai) vai medir o ruído do rótulo prata e criar o primeiro gold com criticidade e BACEN. Ela ainda não foi concluída. Os textos do ConsumerBR não estão neste repositório, porque a licença proíbe redistribuição.</p>
+</section>
+</div>
+
+<!-- ============ PARTE B ============ -->
+<div class="part">
+<div class="part-head">
+  <div class="eyebrow">Parte B</div>
+  <h2>Jev Arena: 13 decision models lado a lado</h2>
+  <p class="note">Execução <code>20260927-205440-6350b9</code>, 27–28 set 2026, Windows com RTX 5090 (32 GB). Fonte: projeto <code>jev-open</code> (<a href="https://github.com/theaiautomators/jev-arena">theaiautomators/jev-arena</a>, MIT). Os <a href="jev-arena/relatorios/arena-full-v2.html">relatórios interativos</a> estão incluídos neste site.</p>
+</div>
+
+<section id="b-full">
+  <h3>Full v2: as mesmas 4.635 questões para todos</h3>
+  <p>Os 13 perfis responderam 7.671 registros cada, 99.723 no total. A comparação justa usa só as questões que todos aceitam: 4.635 com gabarito, sem os casos com muitas opções e sem os que excedem o contexto. A métrica abaixo é a concordância do rótulo escolhido. A "estrita" exige, além disso, uma saída no formato do contrato do Arena.</p>
+  <div class="chart" data-chart="arena"></div>
+  <p>Os intervalos pareados de bootstrap (concorrente − Jev) são: Winnow −0,63 p.p. [−1,25, −0,07], Decider −0,78 [−2,17, +0,38], Nimble −2,89 [−5,59, −1,03]. O intervalo do Decider cruza zero, o que não prova nem equivalência nem superioridade. São comparações exploratórias, sem ajuste, numa suíte fixa.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Perfil</th><th>Abordagem</th><th>Base / escala</th></tr></thead>
+    <tbody>
+      <tr class="jv"><td>Jev 1.13</td><td>Serviço de decisão hospedado</td><td>Não divulgado</td></tr>
+      <tr><td>Winnow</td><td>Fine-tune de decisão, Q8_0</td><td>Gemma 4 12B</td></tr>
+      <tr><td>Decider v2</td><td>Fine-tune de decisão, BF16</td><td>Qwen3.5-4B-Base</td></tr>
+      <tr><td>Nimble</td><td>Adaptador de decisão</td><td>Qwen3.5-9B</td></tr>
+      <tr><td>Plumb</td><td>Fine-tune de decisão</td><td>JevK5 em Qwen3.5-4B</td></tr>
+      <tr><td>SemIf</td><td>Pontuação direta das opções</td><td>Qwen3.5-4B</td></tr>
+      <tr><td>CLM</td><td>Cabeças contrastivas</td><td>Qwen3-8B congelado</td></tr>
+      <tr class="hl"><td>Laya (inglês / typed)</td><td>Encoder de decisão</td><td>ModernBERT-large, 421M</td></tr>
+      <tr class="hl"><td>Laya multilíngue</td><td>Encoder de decisão (a nossa base)</td><td>mmBERT, 322M</td></tr>
+      <tr><td>Qwen JSON · ModernBERT NLI · Uniforme</td><td>Controles</td><td>4B · 395M · sem modelo</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="b-validade">
+  <h3>Cobertura e formato: acertar não basta, a saída tem que ser utilizável</h3>
+  <p>Com todas as 5.671 questões com gabarito, o Jev faz 92,0% no critério estrito e 92,8% só no rótulo. O Decider acerta o rótulo em 92,3%, mas só 83,8% no estrito: 581 vetores de probabilidade não somam 1 dentro da tolerância de 10⁻⁴. Os perfis Laya têm 560–674 falhas desse tipo. Isso é falha do contrato escolhido pelo Arena, não necessariamente um erro de raciocínio.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Perfil</th><th class="n">n</th><th class="n">Estrito</th><th class="n">Rótulo</th><th class="n">Válidas / 7.671</th></tr></thead>
+    <tbody>
+      <tr class="jv"><td>Jev 1.13</td><td class="n">5.671</td><td class="n">91,99%</td><td class="n">92,81%</td><td class="n">7.587</td></tr>
+      <tr><td>Nimble 9B</td><td class="n">5.671</td><td class="n">90,30%</td><td class="n">90,30%</td><td class="n">7.671</td></tr>
+      <tr><td>Plumb 4B</td><td class="n">4.671</td><td class="n">89,42%</td><td class="n">89,42%</td><td class="n">6.671</td></tr>
+      <tr><td>Winnow 12B</td><td class="n">5.671</td><td class="n">84,87%</td><td class="n">84,87%</td><td class="n">7.171</td></tr>
+      <tr><td>Decider 4B v2</td><td class="n">5.671</td><td class="n">83,79%</td><td class="n">92,31%</td><td class="n">7.090</td></tr>
+      <tr><td>Qwen 3.5 JSON</td><td class="n">5.671</td><td class="n">82,44%</td><td class="n">82,44%</td><td class="n">7.669</td></tr>
+      <tr><td>SemIf 4B</td><td class="n">4.671</td><td class="n">81,50%</td><td class="n">81,50%</td><td class="n">6.671</td></tr>
+      <tr class="hl"><td>Laya</td><td class="n">5.671</td><td class="n">55,56%</td><td class="n">57,20%</td><td class="n">6.997</td></tr>
+      <tr><td>ModernBERT NLI</td><td class="n">5.671</td><td class="n">56,55%</td><td class="n">56,55%</td><td class="n">7.671</td></tr>
+      <tr class="hl"><td>Laya typed</td><td class="n">5.671</td><td class="n">53,89%</td><td class="n">57,03%</td><td class="n">7.111</td></tr>
+      <tr class="hl"><td>Laya multilíngue</td><td class="n">5.671</td><td class="n">49,48%</td><td class="n">51,61%</td><td class="n">7.023</td></tr>
+      <tr><td>Uniforme</td><td class="n">5.671</td><td class="n">36,96%</td><td class="n">36,96%</td><td class="n">7.671</td></tr>
+      <tr><td>CLM 8B</td><td class="n">5.635</td><td class="n">30,72%</td><td class="n">30,72%</td><td class="n">7.635</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><p><b>O incidente do Winnow.</b> As 500 falhas no BANKING77 (HTTP 400) vieram de um limite nativo de 64 opções. O BANKING77 tem 77, e o Arena tinha declarado 255 por engano. São pedidos que falharam por capacidade, não 500 respostas erradas. Sem o BANKING77, Jev e Winnow ficam a 5 acertos estritos de distância (4.818 vs 4.813 em 5.171).</p></div>
+  <p class="note">Concordância com o "professor" (2.000 casos rotulados por outro LLM, fora das métricas principais): o Laya typed lidera com 76,9%, seguido do Jev com 73,4%. Concordância não é acerto.</p>
+</section>
+
+<section id="b-velocidade">
+  <h3>Velocidade: medianas seriais de pedidos curtos</h3>
+  <p>Os 200 primeiros casos do JevBench, um pedido por vez, três blocos por perfil, sem contar carga e aquecimento. Cada barra é a mediana dos três p50. A escala é logarítmica.</p>
+  <div class="chart" data-chart="speed"></div>
+  <p class="note">O tempo do Jev inclui a rede. Os perfis locais diferem em tamanho, precisão e runtime, e nenhum foi configurado para vazão máxima. Com o manual completo do ABCD (~20 mil tokens), a ordem se inverte: Jev 358 ms, Qwen 1.570 ms, Decider 1.895 ms, Winnow 2.847 ms. A latência tem de ser medida no tamanho de entrada que vai para produção.</p>
+</section>
+
+<section id="b-fluxos">
+  <h3>Fluxos e repetição: decisões encadeadas</h3>
+  <p>São dois fluxos simples, com 20 seeds cada. Num episódio de tickets, as 12 rotas precisam estar certas. No armazém, o sucesso é chegar ao objetivo. No modo prazo, ações acima de 500 ms são descartadas.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Perfil</th><th class="n">Tickets</th><th class="n">Armazém</th><th class="n">Tickets 500 ms</th><th class="n">Armazém 500 ms</th></tr></thead>
+    <tbody>
+      <tr class="jv"><td>Jev 1.13</td><td class="n">20/20</td><td class="n">20/20</td><td class="n">20/20</td><td class="n">20/20</td></tr>
+      <tr><td>Winnow 12B</td><td class="n">20/20</td><td class="n">19/20</td><td class="n">20/20</td><td class="n">19/20</td></tr>
+      <tr><td>Nimble 9B</td><td class="n">20/20</td><td class="n">17/20</td><td class="n">20/20</td><td class="n">17/20</td></tr>
+      <tr><td>Decider 4B v2</td><td class="n">20/20</td><td class="n">9/20</td><td class="n">20/20</td><td class="n">9/20</td></tr>
+      <tr><td>Plumb 4B</td><td class="n">0/20</td><td class="n">7/20</td><td class="n">0/20</td><td class="n">7/20</td></tr>
+      <tr><td>Qwen 3.5 JSON</td><td class="n">0/20</td><td class="n">1/20</td><td class="n">0/20</td><td class="n">1/20</td></tr>
+      <tr class="hl"><td>Laya (3 perfis), SemIf, NLI, CLM, Uniforme</td><td class="n">0/20</td><td class="n">0/20</td><td class="n">0/20</td><td class="n">0/20</td></tr>
+    </tbody>
+  </table></div>
+  <p>O mecanismo importa mais que o zero. Plumb, Qwen e todos os Laya mandam todo ticket para "Revisão": 62 de 240 rotas certas e 178 adiamentos desnecessários. A saída parece segura, mas não automatiza nada. O CLM manda tudo para "Cobrança", com 62 violações de conta restrita.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Repetição e ordem (200 casos)</th><th class="n">Mesmo rótulo ao repetir</th><th class="n">Mesmo rótulo com opções invertidas</th></tr></thead>
+    <tbody>
+      <tr class="jv"><td>Jev</td><td class="n">199/200</td><td class="n">196/199</td></tr>
+      <tr><td>Winnow</td><td class="n">187/187</td><td class="n">183/187</td></tr>
+      <tr><td>Decider</td><td class="n">200/200</td><td class="n">196/200</td></tr>
+      <tr><td>Nimble</td><td class="n">200/200</td><td class="n">189/200</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="b-tarefas">
+  <h3>Análise por tarefa: a média esconde especialidades</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tarefa (mesmas questões)</th><th>Observação</th><th>Consequência</th></tr></thead>
+    <tbody>
+      <tr><td>Notícias, AG News (500)</td><td><b>Laya inglês 92,2%</b>, Decider 90,0%, Jev 88,2%</td><td>Um encoder pequeno serve bem para um classificador estreito.</td></tr>
+      <tr><td>Sentimento, SST-2 (500)</td><td>Jev 96,4%, Winnow 96,2%, ModernBERT NLI 95,8%</td><td>Um classificador compacto empata nessa tarefa.</td></tr>
+      <tr><td>Inferência multilíngue, XNLI (500)</td><td>Decider 84,0%; Jev e Nimble 81,4%</td><td>Ter "multilingual" no nome não garante nada: teste na língua real.</td></tr>
+      <tr><td>JevBench público (195)</td><td>Plumb 92,3%, Jev 90,3%</td><td>O ranking geral esconde especialidades.</td></tr>
+      <tr><td>Regras de política explícitas (2.440)</td><td>Jev e Winnow 100%</td><td>Oito templates repetidos: não prova competência em política real.</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>A composição muda o ranking.</b> 52,6% da comparação compartilhada vem de 8 templates de regras. Sem eles (2.195 questões), Decider faz 90,02%, Jev 89,93%, Winnow 88,61% e Nimble 87,61%.</p>
+  <p><b>A acurácia esconde o que é recuperado.</b> No SciFact, 90,6% das respostas são "não relevante". Um controle que sempre escolhe a primeira opção chega a 90,6% de acurácia e não encontra nenhum documento relevante. O Laya encontra tantos relevantes quanto o Jev (40 de 47), mas admite 233 falsos positivos, contra 25 do Jev.</p>
+  <p><b>Gabaritos públicos também erram.</b> Em <code>ag news-450</code> (basquete olímpico), o gabarito diz "World", o Laya responde World e o Jev responde Sports. Parte da vantagem do Laya em notícias pode ser concordância com rótulos questionáveis, sem que isso prove memorização.</p>
+</section>
+
+<section id="b-abcd">
+  <h3>ABCD: falar, agir ou encerrar, e qual ação escolher</h3>
+  <p>São 300 conversas reais de atendimento ao cliente (ASAPP), com 900 decisões de rota por condição (falar, agir ou encerrar) e 300 perguntas de ação entre 30 opções. Cada caso aparece em duas condições: com o manual completo (~20 mil tokens) e com 5 seções de política recuperadas por BM25 (~2,5 mil).</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Perfil</th><th class="n">Rota+ação, manual</th><th class="n">Rota+ação, recuperado</th><th class="n">Ação (30), manual</th><th class="n">Ação (30), recuperado</th></tr></thead>
+    <tbody>
+      <tr><td>Winnow 12B Q8</td><td class="n"><b>68,44%</b></td><td class="n"><b>69,56%</b></td><td class="n">66,67%</td><td class="n"><b>76,33%</b></td></tr>
+      <tr class="jv"><td>Jev 1.13</td><td class="n">62,89%</td><td class="n">64,89%</td><td class="n"><b>76,00%</b></td><td class="n">73,33%</td></tr>
+      <tr><td>Nimble 9B</td><td class="n">indisponível (8K)</td><td class="n">60,11%</td><td class="n">indisponível</td><td class="n">64,00%</td></tr>
+      <tr><td>Qwen 3.5 4B JSON</td><td class="n">56,00%</td><td class="n">57,56%</td><td class="n">51,00%</td><td class="n">55,67%</td></tr>
+      <tr><td>Decider 4B v2</td><td class="n">46,00%</td><td class="n">53,22%</td><td class="n">32,33%</td><td class="n">41,00%</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Valores estritos. O Laya não participou do ABCD.</p>
+  <ul>
+    <li><b>Decidir se age e escolher a ação são problemas diferentes.</b> O Winnow ganha no combinado porque acerta mais quando é hora de falar (185 contra 69 de 300). O Jev ganha quando a ação é devida (221 contra 141) e tem o maior macro-F1 nas ações raras (0,769).</li>
+    <li><b>Mais contexto não melhora sempre.</b> A recuperação sobe a ação do Winnow em +9,7 p.p. [+4,7, +14,7] e muda a do Jev em −3,3 [−7,7, +1,0]. Escolher entre manual completo e recuperação é uma decisão experimental, a medir para cada modelo.</li>
+    <li><b>A capacidade é um filtro de elegibilidade.</b> O Nimble (8K) não aceita o manual completo. Pergunta indisponível não é resposta errada.</li>
+  </ul>
+</section>
+
+<section id="b-auditoria">
+  <h3>Auditoria, ressalvas e custo</h3>
+  <ul>
+    <li><b>Auditoria automática (GPT-6 Astra via Codex CLI):</b> no Full v2, 879 revisões de respostas em 300 questões. 26 questões tiveram o gabarito sinalizado e nenhuma foi reescrita. No ABCD, 118 pares revisados: 61 corretos, 36 incorretos e 21 ambíguos. Não houve validação semântica humana, e o próprio Arena marca <code>publication_ready=false</code>.</li>
+    <li><b>Ambiguidade de rota:</b> 50 casos de tickets (0,88%) admitem duas leituras, por exemplo pagamento com serviço fora do ar: Cobrança ou Engenharia? Esses casos explicam 2 dos 5 erros estritos do Jev no Demo.</li>
+    <li><b>Custo do Jev:</b> US$ 0,25 para todo o Full v2 (7.671 casos mais fluxos) e US$ 1,21 para o ABCD, que tem entradas longas. Avaliar o Jev nos nossos dados é barato.</li>
+    <li><b>Tempo:</b> 4 h 33 min para o Full v2 e 3 h 16 min para o ABCD.</li>
+  </ul>
+</section>
+
+<section id="b-pilotos">
+  <h3>Pilotos em português: suítes criadas, ainda sem modelos reais</h3>
+  <p>No jev-open foram criadas duas suítes novas, ainda fora do repositório original. O código está em <code>docs/jev-arena/suites/</code>.</p>
+  <div class="cards">
+    <div class="card"><b>Call center bancário</b><span>100 diálogos em português, 10 departamentos (cartões, faturas, Pix, empréstimos, investimentos, fraude, app, seguros, encerramento, ouvidoria). Execução <code>20261009-104549-8cd4da</code>.</span><a href="jev-arena/relatorios/banking-callcenter-v1.html">Abrir relatório</a></div>
+    <div class="card"><b>Guardrails de agentes</b><span>100 cenários em 5 camadas (entrada, RAG, plano, ferramenta, saída) e 10 políticas, como injeção de prompt e vazamento entre tenants. Execução <code>20261012-011218-334a1c</code>.</span><a href="jev-arena/relatorios/agent-guardrails-v1.html">Abrir relatório</a></div>
+  </div>
+  <div class="callout warn"><p>As duas execuções usaram <b>só o baseline uniforme</b>, que escolhe sempre a primeira opção: 10/100 corretos (10%), exatamente o acaso com 10 classes. Isso prova que o pipeline roda (casos, contrato, pontuação, exportação), mas não mede nenhum modelo. A taxonomia de 10 departamentos também é diferente da nossa (4 assuntos e 13 sub-assuntos).</p></div>
+</section>
+</div>
+
+<!-- ============ PARTE C ============ -->
+<div class="part">
+<div class="part-head">
+  <div class="eyebrow">Parte C</div>
+  <h2>Síntese</h2>
+</div>
+
+<section id="c-implicacoes">
+  <h3>O que o Arena muda no nosso projeto</h3>
+  <div class="findings">
+    <div class="finding"><div class="num">Fine-tune<small>é obrigatório</small></div><p>O Laya multilíngue sem treino faz 56% no Arena e 23% no nosso sub-assunto. Ele não é um decision model genérico: só fica competitivo depois de ajustado à tarefa. Isso reforça o nosso caminho e mostra que a comparação com o Jev só faz sentido com o Laya ajustado.</p></div>
+    <div class="finding"><div class="num">2 passos<small>hierarquia certa</small></div><p>Nenhum modelo local lida bem com 77 opções de uma vez, e o Arena não testou classificação hierárquica. A nossa classificação em dois passos (4 assuntos, depois 3 a 4 sub-assuntos) evita esse limite, mas cria erros próprios: um erro de assunto derruba o sub-assunto.</p></div>
+    <div class="finding"><div class="num">Baseline<small>sempre</small></div><p>O mesmo padrão aparece nos dois estudos: o controle de primeira opção faz 90,6% no SciFact, e o nosso TF-IDF empata com o Laya em todos os testes de assunto. Toda tabela de resultado precisa de um piso simples.</p></div>
+    <div class="finding"><div class="num">Calibrar<small>por modelo</small></div><p>O Arena alerta que limiares de confiança não passam de um modelo para outro. Em texto real, o nosso Laya fica superconfiante (ECE de 24%). O limiar de abstenção precisa ser ajustado em dados reais, para cada modelo, antes de rotear casos para humanos.</p></div>
+    <div class="finding"><div class="num">Contrato<small>de saída</small></div><p>No contrato estrito do Arena, os perfis Laya tiveram 7–9% de vetores de probabilidade inválidos. Se o Laya entrar num fluxo com contrato rígido, precisamos validar a saída e ter um fallback explícito.</p></div>
+    <div class="finding"><div class="num">Fluxo<small>≠ acerto isolado</small></div><p>No Arena, os Laya mandaram todo ticket para revisão humana. Na operação, uma fila de baixa confiança grande demais anula o ganho. Precisamos medir a taxa de abstenção, não só a acurácia.</p></div>
+  </div>
+</section>
+
+<section id="c-limites">
+  <h3>Limitações</h3>
+  <ul>
+    <li><b>Nenhum número compara Jev e o nosso Laya na mesma tarefa.</b> O Arena mede o Laya sem treino; nós medimos o Laya ajustado sem o Jev.</li>
+    <li><b>Os nossos dados sintéticos</b> medem quanto o modelo aprendeu a distribuição sintética. Gerador e juiz são LLMs e podem compartilhar vieses.</li>
+    <li><b>O ConsumerBR</b> tem rótulo prata e é texto escrito, não ligação, sem criticidade e sem BACEN.</li>
+    <li><b>As amostras são pequenas:</b> 75 e 238 conversas sintéticas de teste, com 4 e 14 casos BACEN, e só 3 seeds.</li>
+    <li><b>O Arena</b> usa perfis fixos de implantação, numa suíte com exposição de treino desconhecida, e foi auditado só por um LLM. Os números dele não são um ranking universal.</li>
+    <li><b>Os pilotos em português</b> ainda não rodaram nenhum modelo real.</li>
+  </ul>
+</section>
+
+<section id="c-proximos">
+  <h3>Próximos passos</h3>
+  <ol>
+    <li><b>Rodar o Jev e o Laya ajustado no mesmo protocolo,</b> nas mesmas conversas (<code>splits-cenario/test</code>), gravando <code>preds.jsonl</code> no formato do <code>callsim-laya-eval</code>, com comparação pareada e IC. O custo estimado é de centavos de dólar. Atenção: os textos do ConsumerBR não podem ser enviados para uma API externa sem checar a licença.</li>
+    <li><b>Ligar a suíte bancária do Arena aos nossos dados.</b> Trocar os 100 diálogos escritos à mão pelo nosso teste sintético e mapear os 10 departamentos para os nossos 4 assuntos e 13 sub-assuntos. Depois, rodar Jev, Winnow, Decider, Nimble e o nosso Laya.</li>
+    <li><b>Concluir a auditoria do ConsumerBR</b> (200 casos, κ entre anotadores ou LLMs com adjudicação) para ter o primeiro gold com criticidade e BACEN.</li>
+    <li><b>Recalibrar o Laya em texto real</b> e medir a curva de cobertura × acurácia para a abstenção.</li>
+    <li><b>Gerar mais dados</b> até 30 mil conversas, com mais cenários por sub-assunto, porque variedade foi o que mais ajudou no texto real.</li>
+    <li><b>Fixar o protocolo antes da rodada final,</b> como o Arena fez: perguntas, métricas e análise congeladas antes de ver o gold.</li>
+  </ol>
+</section>
+
+<section id="c-docs">
+  <h3>Documentos e evidências</h3>
+  <div class="cards">
+    <div class="card"><b>Arena Full v2 (interativo)</b><span>13 perfis, replays de fluxos, matrizes de confusão. 7,4 MB.</span><a href="jev-arena/relatorios/arena-full-v2.html">Abrir</a></div>
+    <div class="card"><b>ABCD (interativo)</b><span>5 perfis, manual completo × política recuperada. 1,4 MB.</span><a href="jev-arena/relatorios/abcd-v1.html">Abrir</a></div>
+    <div class="card"><b>Relatório de aprendizados</b><span>Testes 1 e 2 em detalhe, com matrizes de criticidade e acerto por tópico.</span><a href="relatorio-aprendizados.html">Abrir</a></div>
+    <div class="card"><b>Treinamento do Laya</b><span>Diagrama executivo do pipeline e das salvaguardas.</span><a href="treinamento-laya.html">Abrir</a></div>
+    <div class="card"><b>Textos originais do Arena</b><span>Resultados, análise, protocolo ABCD, ressalvas, verificação (em inglês).</span><a href="https://github.com/marcospflbarreto/decision-models-eval-callcenter/tree/main/docs/jev-arena/fontes">Ver no GitHub</a></div>
+    <div class="card"><b>Evidências e auditoria</b><span>Revisões do Astra, suplementos com intervalos, guia de modelos.</span><a href="https://github.com/marcospflbarreto/decision-models-eval-callcenter/tree/main/docs/jev-arena/evidencias">Ver no GitHub</a></div>
+    <div class="card"><b>Pacotes ZIP de evidência</b><span>Predições sanitizadas e snapshot do código, no release original.</span><a href="https://github.com/theaiautomators/jev-arena/releases/tag/video-results-2026-09">Release jev-arena</a></div>
+  </div>
+</section>
+</div>
+
+<footer>
+  <p>Nosso projeto: números de <code>logs/compare-splits-cenario.txt</code>, <code>logs/compare-v1-vs-tfidf.json</code>, <code>logs/eval-consumerbr-laya.txt</code> e <code>logs/compare-consumerbr.txt</code> (laya 0.4.17, laya-multilingual 322M). Jev Arena: <code>docs/jev-arena/fontes/RESULTS.md</code>, <code>ANALYSIS.md</code>, <code>ABCD-RESULTS.md</code> e <code>BUILDER-TAKEAWAYS.md</code>, copiados de <code>jev-open</code> sem alteração.</p>
+  <p>Banco Meridiano e todos os dados sintéticos são fictícios. Jev Arena © Jev Arena contributors, licença MIT.</p>
+</footer>
+</main>
+</div>
+
+<script>
+// Dados dos gráficos. lo/hi = IC 95% quando existir.
+const CHARTS = {
+  t1: { title: "Teste 1 · 75 conversas, cenários conhecidos", max: 100, groups: [
+    ["Sub-assunto (2 passos)", [
+      { l: "Laya ajustado (v1)", v: 100, lo: 95.1, hi: 100, c: "laya" },
+      { l: "TF-IDF", v: 98.7, lo: 92.8, hi: 99.8, c: "tfidf" },
+      { l: "Laya base", v: 23, c: "base" } ]],
+    ["Criticidade exata", [
+      { l: "Laya ajustado (v1)", v: 85.3, lo: 75.6, hi: 91.6, c: "laya" },
+      { l: "TF-IDF", v: 92.0, lo: 83.6, hi: 96.3, c: "tfidf" } ]] ],
+    legend: [["laya", "Laya ajustado"], ["tfidf", "TF-IDF + regressão logística"], ["base", "Laya base, sem treino"]] },
+  t2: { title: "Teste 2 · 238 conversas, cenários inéditos", max: 100, groups: [
+    ["Assunto", [ { l: "Laya (3 seeds)", v: 95, lo: 92, hi: 97, c: "laya" }, { l: "TF-IDF", v: 89, lo: 84, hi: 92, c: "tfidf" } ]],
+    ["Sub-assunto (2 passos)", [ { l: "Laya (3 seeds)", v: 84, lo: 77, hi: 91, c: "laya" }, { l: "TF-IDF", v: 82, lo: 76, hi: 86, c: "tfidf" } ]],
+    ["Criticidade exata", [ { l: "Laya (3 seeds)", v: 70, lo: 62, hi: 78, c: "laya" }, { l: "TF-IDF", v: 82, lo: 76, hi: 86, c: "tfidf" } ]],
+    ["Recall grave ou BACEN", [ { l: "Laya (3 seeds)", v: 76, lo: 57, hi: 92, c: "laya" }, { l: "TF-IDF", v: 93, lo: 81, hi: 98, c: "tfidf" } ]],
+    ["Recall BACEN (14 casos)", [ { l: "Laya (3 seeds)", v: 100, lo: 78, hi: 100, c: "laya" }, { l: "TF-IDF", v: 100, lo: 78, hi: 100, c: "tfidf" } ]] ],
+    legend: [["laya", "Laya ajustado (média de 3 seeds; barra = menor e maior limite dos ICs)"], ["tfidf", "TF-IDF"]] },
+  t3: { title: "Teste 3 · 1.650 reclamações reais (ConsumerBR)", max: 100, groups: [
+    ["Assunto", [
+      { l: "Laya v1 (split por id)", v: 68, lo: 66, hi: 70, c: "laya" },
+      { l: "Laya cenário (3 seeds)", v: 68, lo: 63, hi: 72, c: "laya" },
+      { l: "TF-IDF", v: 67, lo: 65, hi: 69, c: "tfidf" },
+      { l: "Laya base", v: 49, lo: 47, hi: 52, c: "base" } ]],
+    ["Sub-assunto (2 passos, n = 1.350)", [
+      { l: "Laya v1 (split por id)", v: 48, lo: 46, hi: 51, c: "laya" },
+      { l: "Laya cenário (3 seeds)", v: 44, lo: 40, hi: 47, c: "laya" },
+      { l: "TF-IDF", v: 48, lo: 46, hi: 51, c: "tfidf" },
+      { l: "Laya base", v: 23, lo: 20, hi: 25, c: "base" } ]],
+    ["ECE do assunto (menor é melhor)", [
+      { l: "Laya v1 (split por id)", v: 24, lo: 22, hi: 26, c: "laya" },
+      { l: "TF-IDF", v: 4, lo: 3, hi: 6, c: "tfidf" },
+      { l: "Laya base", v: 30, lo: 28, hi: 32, c: "base" } ]] ],
+    legend: [["laya", "Laya ajustado"], ["tfidf", "TF-IDF"], ["base", "Laya base"]] },
+  arena: { title: "Concordância de rótulo nas mesmas 4.635 questões", max: 100, digits: 2, groups: [["", [
+    { l: "Jev 1.13", v: 95.23, c: "jev" }, { l: "Winnow 12B", v: 94.61 }, { l: "Decider 4B v2", v: 94.46 },
+    { l: "Nimble 9B", v: 92.34 }, { l: "Plumb 4B", v: 89.54 }, { l: "Qwen 3.5 JSON", v: 85.78 },
+    { l: "SemIf 4B", v: 81.70 }, { l: "Laya", v: 64.83, c: "laya" }, { l: "Laya typed", v: 63.91, c: "laya" },
+    { l: "ModernBERT NLI", v: 58.73 }, { l: "Laya multilíngue", v: 56.31, c: "laya" },
+    { l: "Uniforme", v: 44.77 }, { l: "CLM 8B", v: 36.09 } ]]],
+    legend: [["jev", "Jev"], ["laya", "Laya, sem fine-tuning"], ["base", "Demais perfis e controles"]] },
+  speed: { title: "Mediana serial por pedido (ms, escala log)", log: true, unit: " ms", digits: 0, groups: [["", [
+    { l: "Laya multilíngue", v: 13.87, c: "laya" }, { l: "Laya typed", v: 17.06, c: "laya" }, { l: "Laya", v: 17.22, c: "laya" },
+    { l: "ModernBERT NLI", v: 20.45 }, { l: "Decider 4B v2", v: 47.45 }, { l: "Plumb 4B", v: 48.84 },
+    { l: "Nimble 9B", v: 49.68 }, { l: "SemIf 4B", v: 50.96 }, { l: "Winnow 12B", v: 55.97 },
+    { l: "CLM 8B", v: 117.22 }, { l: "Jev 1.13 (hospedado)", v: 244.70, c: "jev" }, { l: "Qwen 3.5 JSON", v: 316.90 } ]]],
+    legend: [["laya", "Laya"], ["jev", "Jev (inclui rede)"], ["base", "Demais"]] }
+};
+
+const fmt = (v, d) => v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+function render(el, spec) {
+  const pos = spec.log
+    ? (v) => { const a = Math.log10(10), b = Math.log10(400); return Math.max(0, Math.min(100, (Math.log10(v) - a) / (b - a) * 100)); }
+    : (v) => v / spec.max * 100;
+  const d = spec.digits ?? 0, unit = spec.unit ?? "%";
+  let h = `<h3>${spec.title}</h3>`;
+  for (const [g, rows] of spec.groups) {
+    if (g) h += `<div class="group-label">${g}</div>`;
+    h += `<div class="bars">`;
+    for (const r of rows) {
+      const ci = r.lo != null ? `<span class="ci" style="left:${pos(r.lo)}%;width:${pos(r.hi) - pos(r.lo)}%"></span>` : "";
+      const tip = r.lo != null ? ` title="IC 95%: ${fmt(r.lo, 0)}–${fmt(r.hi, 0)}%"` : "";
+      h += `<div class="bar"${tip}><span class="lab">${r.l}</span><span class="track"><span class="fill ${r.c || "base"}" style="width:${pos(r.v)}%"></span>${ci}</span><span class="val">${fmt(r.v, d)}${unit}</span></div>`;
+    }
+    h += `</div>`;
+  }
+  if (spec.legend) h += `<div class="legend">${spec.legend.map(([c, t]) => `<span><i class="fill ${c}" style="position:static;display:inline-block"></i>${t}</span>`).join("")}</div>`;
+  el.innerHTML = h;
+}
+document.querySelectorAll("[data-chart]").forEach((el) => render(el, CHARTS[el.dataset.chart]));
+
+// Navegação móvel espelha a lateral; destaque da seção visível nas duas.
+const side = [...document.querySelectorAll(".sidenav a.l")];
+const topNav = document.getElementById("topnav");
+side.forEach((a) => { const b = document.createElement("a"); b.href = a.getAttribute("href"); b.textContent = a.textContent; topNav.appendChild(b); });
+const links = [...side, ...topNav.querySelectorAll("a")];
+const targets = side.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+const io = new IntersectionObserver((entries) => {
+  const vis = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+  if (!vis) return;
+  const id = "#" + vis.target.id;
+  links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === id));
+  const t = topNav.querySelector(`a[href="${id}"]`);
+  if (t && getComputedStyle(topNav).display !== "none") t.scrollIntoView({ block: "nearest", inline: "center" });
+}, { rootMargin: "-10% 0px -75% 0px" });
+targets.forEach((t) => io.observe(t));
+</script>
+</body>
+</html>
