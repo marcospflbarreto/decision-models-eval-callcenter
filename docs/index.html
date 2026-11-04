@@ -152,6 +152,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
   <a class="l" href="#a-teste1">Teste 1: cenários conhecidos</a>
   <a class="l" href="#a-teste2">Teste 2: cenários novos</a>
   <a class="l" href="#a-real">Teste 3: reclamações reais</a>
+  <a class="l" href="#a-gold">Teste 4: maioria de LLMs</a>
   <div class="group">Parte B · Jev Arena</div>
   <a class="l" href="#b-full">Full v2: 13 perfis</a>
   <a class="l" href="#b-validade">Cobertura e formato</a>
@@ -173,19 +174,20 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
   <div class="eyebrow">Relatório consolidado · Decision models</div>
   <h1>Decision models no call center bancário: tudo o que medimos</h1>
   <p class="lede">Junta dois estudos. O nosso treina o Laya, um decision model aberto, para classificar ligações por assunto, sub-assunto e criticidade. O Jev Arena compara 13 decision models, incluindo o Jev e o Laya, em 7.671 casos públicos e num teste de atendimento ao cliente (ABCD).</p>
-  <div class="meta"><span>3 nov 2026</span><span>Nosso projeto: Mac M5 Max, 64 GB</span><span>Jev Arena: Windows, RTX 5090</span></div>
+  <div class="meta"><span>4 nov 2026</span><span>Nosso projeto: Mac M5 Max, 64 GB</span><span>Jev Arena: Windows, RTX 5090</span></div>
   <div class="legend"><span><span class="tag nosso">nosso</span>medido neste repositório</span><span><span class="tag arena">arena</span>medido no Jev Arena (projeto jev-open)</span></div>
 </header>
 
 <section id="achados">
   <div class="eyebrow">Resumo</div>
-  <h2>Oito achados</h2>
+  <h2>Nove achados</h2>
   <div class="findings">
     <div class="finding"><div class="num">95,2%<small>Jev, rótulos iguais</small></div><p><span class="tag arena">arena</span>Nas mesmas 4.635 questões com gabarito, o Jev lidera (95,2%), mas três modelos locais ficam a menos de 3 p.p.: Winnow 94,6%, Decider 94,5%, Nimble 92,3%. Não há vencedor universal.</p></div>
     <div class="finding"><div class="num">56–65%<small>Laya sem fine-tuning</small></div><p><span class="tag arena">arena</span>As três versões do Laya sem treino específico ficam entre 56% e 65% na mesma comparação. O multilíngue, que é a base do nosso modelo, fica em 56,3%. O Arena não testou nenhum Laya ajustado à tarefa.</p></div>
     <div class="finding"><div class="num">23% → 84%<small>sub-assunto, nosso Laya</small></div><p><span class="tag nosso">nosso</span>Com fine-tuning em 539 conversas sintéticas, o Laya multilíngue vai de 23% para 84% no sub-assunto, em cenários que nunca viu (média de 3 seeds). O TF-IDF chega a 82%, um empate estatístico.</p></div>
     <div class="finding"><div class="num">48%<small>sub-assunto, texto real</small></div><p><span class="tag nosso">nosso</span>Em 1.650 reclamações reais do consumidor.gov.br, o sub-assunto cai para 48% e o assunto para 68%. O TF-IDF empata de novo (48% e 67%). O Laya está mal calibrado nesse texto: ECE de 24%, contra 4% do TF-IDF.</p></div>
     <div class="finding"><div class="num">70% vs 82%<small>criticidade, Laya vs TF-IDF</small></div><p><span class="tag nosso">nosso</span>A criticidade é o ponto fraco do Laya: ele rebaixa casos graves (recall de grave ou BACEN de 76%, contra 93% do TF-IDF). O BACEN é detectado pelos dois em todos os 14 casos.</p></div>
+    <div class="finding"><div class="num">34% vs 48%<small>criticidade real, Laya vs nível fixo</small></div><p><span class="tag nosso">nosso</span>Em 177 reclamações reais rotuladas pela maioria de 3 LLMs, o Laya acerta 34% da criticidade, menos do que prever sempre "importante" (48%). No assunto, faz 81% contra 85% do TF-IDF, sem diferença significativa. O gabarito é de LLMs, não humano.</p></div>
     <div class="finding"><div class="num">~15 ms<small>Laya, por pedido</small></div><p><span class="tag arena">arena</span>O Laya é o modelo mais rápido do Arena (14–18 ms por pedido), contra ~245 ms do Jev hospedado. No nosso Mac, o Laya leva ~29 ms por conversa.</p></div>
     <div class="finding"><div class="num">77 opções<small>limite de capacidade</small></div><p><span class="tag arena">arena</span>Com 77 opções de uma vez (BANKING77), o Plumb e o SemIf não aceitam a pergunta e o Winnow falha (limite de 64). Isso confirma a nossa escolha de classificar em dois passos: primeiro o assunto, depois o sub-assunto.</p></div>
     <div class="finding"><div class="num">0<small>modelos reais no piloto</small></div><p><span class="tag arena">arena</span>A suíte de call center bancário em português (100 casos, 10 departamentos) e a de guardrails foram criadas no Arena, mas só rodaram com o baseline uniforme. O Jev ainda não foi avaliado em dados de call center bancário.</p></div>
@@ -202,6 +204,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
       <tr><td><span class="tag nosso">nosso</span>Teste 1</td><td>Assunto, sub-assunto, criticidade, BACEN</td><td>Laya ajustado, Laya base, TF-IDF</td><td class="n">75</td><td>Sintético, por construção</td></tr>
       <tr><td><span class="tag nosso">nosso</span>Teste 2</td><td>Idem, com cenários inéditos</td><td>Laya (3 seeds), TF-IDF</td><td class="n">238</td><td>Sintético, por construção</td></tr>
       <tr><td><span class="tag nosso">nosso</span>Teste 3</td><td>Assunto e sub-assunto em reclamações reais</td><td>5 Laya, TF-IDF</td><td class="n">1.650</td><td>Prata: escolha do consumidor</td></tr>
+      <tr><td><span class="tag nosso">nosso</span>Teste 4</td><td>Assunto, sub-assunto, criticidade, BACEN em reclamações reais</td><td>Laya (v1 e 3 seeds), TF-IDF</td><td class="n">177</td><td>Maioria de 3 LLMs</td></tr>
       <tr><td><span class="tag arena">arena</span>Full v2</td><td>Classificação, relevância, regras, fluxos</td><td>13 perfis</td><td class="n">7.671 / perfil</td><td>Público + regras geradas</td></tr>
       <tr><td><span class="tag arena">arena</span>ABCD</td><td>Próximo passo e ação no atendimento</td><td>5 perfis</td><td class="n">2.544 / perfil</td><td>Passos gravados (ASAPP)</td></tr>
       <tr><td><span class="tag arena">arena</span>Pilotos</td><td>Departamento bancário (PT), guardrails</td><td>Só baseline uniforme</td><td class="n">100 + 100</td><td>Escrito à mão</td></tr>
@@ -262,7 +265,29 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
     <li><b>O Laya fica superconfiante.</b> O ECE do assunto vai a 22–27%, contra 4% do TF-IDF. Antes de usar a confiança para abstenção, é preciso recalibrar em dados reais.</li>
     <li><b>Velocidade:</b> 29 ms por conversa no Mac (MPS), contra 1,3 ms do TF-IDF.</li>
   </ul>
-  <p class="note">A auditoria cega de 200 reclamações (página <a href="auditoria-consumerbr.html">Auditoria ConsumerBR</a>, que só funciona em claude.ai) vai medir o ruído do rótulo prata e criar o primeiro gold com criticidade e BACEN. Ela ainda não foi concluída. Os textos do ConsumerBR não estão neste repositório, porque a licença proíbe redistribuição.</p>
+  <p class="note">Os textos do ConsumerBR não estão neste repositório, porque a licença proíbe redistribuição.</p>
+</section>
+
+<section id="a-gold">
+  <h3>Teste 4 · maioria de 3 LLMs: o primeiro teste real com criticidade</h3>
+  <p>A auditoria humana planejada (página <a href="auditoria-consumerbr.html">Auditoria ConsumerBR</a>, que só funciona em claude.ai) não foi feita, porque rotular exige conhecimento de ouvidoria. No lugar dela, três LLMs abertos rotularam às cegas 200 reclamações, rodando localmente: Mistral Small 24B, Llama 3.3 70B e gpt-oss 20B. Nenhum é da família do gerador (gemma) nem do juiz (qwen), que produziram e filtraram o treino.</p>
+  <p>Cada campo fica com a maioria. Das 200, 177 entram no teste, 18 ficam fora da taxonomia e 5 empatam no assunto. Nos campos empatados das 177, a reclamação sai só daquela métrica. <b>Isto não é um gold humano:</b> os três modelos podem errar juntos.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Concordância (κ, n = 200)</th><th class="n">Assunto</th><th class="n">Sub-assunto</th><th class="n">Criticidade (ponderado)</th><th class="n">BACEN</th></tr></thead>
+    <tbody>
+      <tr><td>Llama × Mistral</td><td class="n">0,83</td><td class="n">0,62</td><td class="n">0,78</td><td class="n">0,61</td></tr>
+      <tr><td>gpt-oss × Mistral</td><td class="n">0,76</td><td class="n">0,55</td><td class="n">0,48</td><td class="n">0,18</td></tr>
+      <tr><td>gpt-oss × Llama</td><td class="n">0,70</td><td class="n">0,58</td><td class="n">0,54</td><td class="n">0,25</td></tr>
+    </tbody>
+  </table></div>
+  <div class="chart" data-chart="t4"></div>
+  <ul>
+    <li><b>O Laya não supera o TF-IDF.</b> No assunto, são 81% contra 85% (McNemar p_Holm = 0,53). No sub-assunto, 68% contra 72% (p_Holm = 0,53). É o segundo empate em texto real.</li>
+    <li><b>A criticidade não passa do sintético para o real.</b> Prever sempre "importante" acerta 48%, mais que qualquer modelo. O Laya v1 prevê "normal" 72 vezes, contra 13 no gabarito, e subestima 51% dos casos. Uma explicação possível, ainda não testada, é que quem registra uma reclamação quase sempre já teve algum prejuízo.</li>
+    <li><b>O rótulo prata pesa no Teste 3.</b> Nas mesmas reclamações, o sub-assunto do Laya v1 é 68% contra a maioria de LLMs e 48% contra o prata (n = 132). No assunto, 81% contra 73% (n = 177). A maioria de LLMs concorda com o prata em 82% dos assuntos e 60% dos sub-assuntos.</li>
+    <li><b>O BACEN é só exploratório.</b> O gpt-oss marca 4 casos, o Llama 18 e o Mistral 34; só 3 são unânimes. Com 17 positivos, o Laya v1 tem recall de 24% e precisão de 19%. O McNemar da decisão BACEN favorece o TF-IDF (p_Holm = 0,003), mas ele só prevê BACEN 4 vezes: isso reflete a classe rara, não melhor detecção.</li>
+  </ul>
+  <p class="note">Viés a declarar: tirar empates e casos fora da taxonomia tende a remover os casos difíceis. Restam 32 reclamações com algum empate, ainda sem adjudicação humana.</p>
 </section>
 </div>
 
@@ -438,7 +463,8 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
   <ul>
     <li><b>Nenhum número compara Jev e o nosso Laya na mesma tarefa.</b> O Arena mede o Laya sem treino; nós medimos o Laya ajustado sem o Jev.</li>
     <li><b>Os nossos dados sintéticos</b> medem quanto o modelo aprendeu a distribuição sintética. Gerador e juiz são LLMs e podem compartilhar vieses.</li>
-    <li><b>O ConsumerBR</b> tem rótulo prata e é texto escrito, não ligação, sem criticidade e sem BACEN.</li>
+    <li><b>O ConsumerBR</b> é texto escrito, não ligação. No Teste 3, o rótulo é prata e não há criticidade nem BACEN.</li>
+    <li><b>O gabarito do Teste 4</b> é a maioria de 3 LLMs, sem revisão humana, em só 177 reclamações. A concordância é moderada na criticidade e baixa no BACEN.</li>
     <li><b>As amostras são pequenas:</b> 75 e 238 conversas sintéticas de teste, com 4 e 14 casos BACEN, e só 3 seeds.</li>
     <li><b>O Arena</b> usa perfis fixos de implantação, numa suíte com exposição de treino desconhecida, e foi auditado só por um LLM. Os números dele não são um ranking universal.</li>
     <li><b>Os pilotos em português</b> ainda não rodaram nenhum modelo real.</li>
@@ -450,7 +476,8 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
   <ol>
     <li><b>Rodar o Jev e o Laya ajustado no mesmo protocolo,</b> nas mesmas conversas (<code>splits-cenario/test</code>), gravando <code>preds.jsonl</code> no formato do <code>callsim-laya-eval</code>, com comparação pareada e IC. O custo estimado é de centavos de dólar. Atenção: os textos do ConsumerBR não podem ser enviados para uma API externa sem checar a licença.</li>
     <li><b>Ligar a suíte bancária do Arena aos nossos dados.</b> Trocar os 100 diálogos escritos à mão pelo nosso teste sintético e mapear os 10 departamentos para os nossos 4 assuntos e 13 sub-assuntos. Depois, rodar Jev, Winnow, Decider, Nimble e o nosso Laya.</li>
-    <li><b>Concluir a auditoria do ConsumerBR</b> (200 casos, κ entre anotadores ou LLMs com adjudicação) para ter o primeiro gold com criticidade e BACEN.</li>
+    <li><b>Revisar com alguém de ouvidoria ou compliance</b> as 32 reclamações com empate e os casos de BACEN, para ter um gabarito humano nos pontos em que os LLMs divergem.</li>
+    <li><b>Testar se poucos exemplos reais corrigem a criticidade,</b> já que o treino só com sintético fica abaixo de um nível fixo em texto real.</li>
     <li><b>Recalibrar o Laya em texto real</b> e medir a curva de cobertura × acurácia para a abstenção.</li>
     <li><b>Gerar mais dados</b> até 30 mil conversas, com mais cenários por sub-assunto, porque variedade foi o que mais ajudou no texto real.</li>
     <li><b>Fixar o protocolo antes da rodada final,</b> como o Arena fez: perguntas, métricas e análise congeladas antes de ver o gold.</li>
@@ -472,7 +499,7 @@ footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 0.85re
 </div>
 
 <footer>
-  <p>Nosso projeto: números de <code>logs/compare-splits-cenario.txt</code>, <code>logs/compare-v1-vs-tfidf.json</code>, <code>logs/eval-consumerbr-laya.txt</code> e <code>logs/compare-consumerbr.txt</code> (laya 0.4.17, laya-multilingual 322M). Jev Arena: <code>docs/jev-arena/fontes/RESULTS.md</code>, <code>ANALYSIS.md</code>, <code>ABCD-RESULTS.md</code> e <code>BUILDER-TAKEAWAYS.md</code>, copiados de <code>jev-open</code> sem alteração.</p>
+  <p>Nosso projeto: números de <code>logs/compare-splits-cenario.txt</code>, <code>logs/compare-v1-vs-tfidf.json</code>, <code>logs/eval-consumerbr-laya.txt</code>, <code>results/compare-consumerbr.txt</code>, <code>results/compare-gold-llm.txt</code> e <code>results/auditoria-llm.txt</code> (laya 0.4.17, laya-multilingual 322M). Jev Arena: <code>docs/jev-arena/fontes/RESULTS.md</code>, <code>ANALYSIS.md</code>, <code>ABCD-RESULTS.md</code> e <code>BUILDER-TAKEAWAYS.md</code>, copiados de <code>jev-open</code> sem alteração.</p>
   <p>Banco Meridiano e todos os dados sintéticos são fictícios. Jev Arena © Jev Arena contributors, licença MIT.</p>
 </footer>
 </main>
@@ -513,6 +540,25 @@ const CHARTS = {
       { l: "TF-IDF", v: 4, lo: 3, hi: 6, c: "tfidf" },
       { l: "Laya base", v: 30, lo: 28, hi: 32, c: "base" } ]] ],
     legend: [["laya", "Laya ajustado"], ["tfidf", "TF-IDF"], ["base", "Laya base"]] },
+  t4: { title: "Teste 4 · 177 reclamações reais, maioria de 3 LLMs", max: 100, groups: [
+    ["Assunto", [
+      { l: "Laya v1", v: 81, lo: 75, hi: 86, c: "laya" },
+      { l: "Laya cenário", v: 81, lo: 73, hi: 86, c: "laya" },
+      { l: "TF-IDF", v: 85, lo: 79, hi: 90, c: "tfidf" } ]],
+    ["Sub-assunto (2 passos, n = 148)", [
+      { l: "Laya v1", v: 68, lo: 60, hi: 75, c: "laya" },
+      { l: "Laya cenário", v: 66, lo: 56, hi: 75, c: "laya" },
+      { l: "TF-IDF", v: 72, lo: 64, hi: 78, c: "tfidf" } ]],
+    ["Criticidade exata (n = 170)", [
+      { l: "Laya v1", v: 34, lo: 27, hi: 41, c: "laya" },
+      { l: "Laya cenário", v: 28, lo: 20, hi: 37, c: "laya" },
+      { l: "TF-IDF", v: 26, lo: 20, hi: 34, c: "tfidf" },
+      { l: "Nível fixo", v: 48, c: "base" } ]],
+    ["Recall grave ou BACEN (n = 75)", [
+      { l: "Laya v1", v: 53, lo: 42, hi: 64, c: "laya" },
+      { l: "Laya cenário", v: 48, lo: 33, hi: 64, c: "laya" },
+      { l: "TF-IDF", v: 33, lo: 24, hi: 45, c: "tfidf" } ]] ],
+    legend: [["laya", "Laya ajustado (cenário: média de 3 seeds)"], ["tfidf", "TF-IDF"], ["base", "Sempre \"importante\""]] },
   arena: { title: "Concordância de rótulo nas mesmas 4.635 questões", max: 100, digits: 2, groups: [["", [
     { l: "Jev 1.13", v: 95.23, c: "jev" }, { l: "Winnow 12B", v: 94.61 }, { l: "Decider 4B v2", v: 94.46 },
     { l: "Nimble 9B", v: 92.34 }, { l: "Plumb 4B", v: 89.54 }, { l: "Qwen 3.5 JSON", v: 85.78 },
