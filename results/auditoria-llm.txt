@@ -1,0 +1,36 @@
+3 anotador(es): gpt-oss-20… (200 itens), llama3.3-7… (200 itens), mistral-sm… (200 itens)
+
+== gpt-oss-20… vs rótulo prata
+  assunto igual ao prata       144/200 = 72% [65%, 78%]
+  sub-assunto igual ao prata   82/164 = 50% [42%, 58%]
+  fora da taxonomia            34/200 = 17% [12%, 23%]
+  com dúvida                   3/200 = 2% [1%, 4%]
+  criticidade                  {'importante': 89, 'normal': 43, 'grave': 64, 'BACEN': 4}
+  risco BACEN                  4/200 = 2% [1%, 5%]
+  maiores divergências (prata -> anotador): [(('conta_pix', 'fora'), 15), (('faturas_cobranca', 'emprestimos_financiamentos'), 13), (('faturas_cobranca', 'fora'), 9), (('emprestimos_financiamentos', 'fora'), 8), (('faturas_cobranca', 'cartoes_limite'), 2)]
+
+== llama3.3-7… vs rótulo prata
+  assunto igual ao prata       149/200 = 74% [68%, 80%]
+  sub-assunto igual ao prata   84/164 = 51% [44%, 59%]
+  fora da taxonomia            15/200 = 8% [5%, 12%]
+  com dúvida                   9/200 = 4% [2%, 8%]
+  criticidade                  {'BACEN': 18, 'normal': 20, 'grave': 87, 'importante': 75}
+  risco BACEN                  18/200 = 9% [6%, 14%]
+  maiores divergências (prata -> anotador): [(('faturas_cobranca', 'emprestimos_financiamentos'), 13), (('emprestimos_financiamentos', 'fora'), 8), (('conta_pix', 'emprestimos_financiamentos'), 6), (('faturas_cobranca', 'cartoes_limite'), 6), (('conta_pix', 'faturas_cobranca'), 4)]
+
+== mistral-sm… vs rótulo prata
+  assunto igual ao prata       142/200 = 71% [64%, 77%]
+  sub-assunto igual ao prata   75/164 = 46% [38%, 53%]
+  fora da taxonomia            17/200 = 8% [5%, 13%]
+  com dúvida                   1/200 = 0% [0%, 3%]
+  criticidade                  {'BACEN': 34, 'normal': 27, 'grave': 42, 'importante': 97}
+  risco BACEN                  34/200 = 17% [12%, 23%]
+  maiores divergências (prata -> anotador): [(('faturas_cobranca', 'emprestimos_financiamentos'), 16), (('conta_pix', 'emprestimos_financiamentos'), 6), (('faturas_cobranca', 'cartoes_limite'), 6), (('emprestimos_financiamentos', 'fora'), 6), (('conta_pix', 'fora'), 6)]
+
+== concordância entre anotadores (itens rotulados por ambos)
+  gpt-oss-… x llama3.3… n=200: kappa assunto 0.70, sub 0.58, criticidade (ponderado) 0.54, BACEN 0.25
+  gpt-oss-… x mistral-… n=200: kappa assunto 0.76, sub 0.55, criticidade (ponderado) 0.48, BACEN 0.18
+  llama3.3… x mistral-… n=200: kappa assunto 0.83, sub 0.62, criticidade (ponderado) 0.78, BACEN 0.61
+
+-> data/consumerbr/auditoria/gold_llm.jsonl: 177 reclamações com rótulo gold (fora da taxonomia e empates no assunto ficam de fora)
+-> data/consumerbr/auditoria/gold_llm_pendentes.jsonl: 32 reclamações com empate para adjudicação humana

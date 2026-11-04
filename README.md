@@ -115,17 +115,25 @@ uv run callsim-laya-eval --model models/laya-callcenter-v1 --test data/consumerb
 O `gold.jsonl` é o primeiro teste real com criticidade e risco BACEN.
 
 **Rotulagem por LLM.** Sem anotadores com conhecimento de ouvidoria, [rotular_llm.py](src/callsim/rotular_llm.py)
-aplica o mesmo protocolo da página com dois LLMs abertos, rodando localmente (o texto não sai da máquina).
+aplica o mesmo protocolo da página com três LLMs abertos, rodando localmente (o texto não sai da máquina).
 Os modelos são de famílias diferentes do gerador (gemma) e do juiz (qwen), porque o treino foi gerado e
-filtrado por esses dois. Onde os dois LLMs concordam, o rótulo entra no gold; as divergências vão para
-adjudicação humana. No estudo, isso aparece como "rotulado por LLMs com adjudicação humana", não como gold humano.
+filtrado por esses dois. Cada campo fica com a maioria; empates ficam sem rótulo e vão para
+`gold_llm_pendentes.jsonl`, para adjudicação humana. No estudo, isso aparece como "rotulado por maioria de LLMs",
+não como gold humano. A concordância no risco BACEN é baixa (kappa 0,18 a 0,61), então essa métrica é só exploratória.
 
 ```bash
-ollama pull mistral-small3.1:24b && ollama pull llama3.3:70b
-uv run python -m callsim.rotular_llm --model mistral-small3.1:24b
-uv run python -m callsim.rotular_llm --model llama3.3:70b
+ollama pull mistral-small3.1:24b && ollama pull llama3.3:70b && ollama pull gpt-oss:20b
+OLLAMA_NUM_PARALLEL=1 scripts/ollama-fast.sh                 # outro terminal: contexto curto (o Llama 70B não cabe em 64 GB sem isso)
+uv run python -m callsim.rotular_llm --base-url http://localhost:11435/v1 --model mistral-small3.1:24b
+uv run python -m callsim.rotular_llm --base-url http://localhost:11435/v1 --model llama3.3:70b
+uv run python -m callsim.rotular_llm --base-url http://localhost:11435/v1 --model gpt-oss:20b --max-tokens 6000
 uv run python -m callsim.auditoria --export data/consumerbr/auditoria/export_llm --out data/consumerbr/auditoria/gold_llm.jsonl
 ```
+
+**Resultados.** A pasta [results](results) guarda só os agregados: comparações (`compare-*`), apuração da
+rotulagem (`auditoria-llm.txt`) e métricas por modelo (`metrics/`). Predições por item e textos ficam fora do
+repositório. No gold por maioria de LLMs (177 reclamações), o Laya v1 fez 81% em assunto, 68% em sub-assunto e
+34% em criticidade exata; o TF-IDF fez 85%, 72% e 26%. Prever sempre "importante" acertaria 48% da criticidade.
 
 ## Custo de geração
 

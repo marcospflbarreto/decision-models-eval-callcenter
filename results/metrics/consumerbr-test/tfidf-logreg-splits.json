@@ -1,0 +1,101 @@
+{
+  "n": 1650,
+  "bacen_n": 0,
+  "limiar_bacen": 0.5,
+  "metricas": {
+    "assunto": {
+      "valor": 0.6715151515151515,
+      "ic95": [
+        0.6484779343534893,
+        0.6937555953365923
+      ],
+      "k": 1108,
+      "n": 1650
+    },
+    "sub_assunto_2_passos": {
+      "valor": 0.4822222222222222,
+      "ic95": [
+        0.45565559376454917,
+        0.5088897378270746
+      ],
+      "k": 651,
+      "n": 1350
+    },
+    "sub_assunto_macro_f1": {
+      "valor": 0.4840249588284038,
+      "ic95": [
+        0.45831429019616365,
+        0.5111750452611021
+      ],
+      "n": 1350
+    },
+    "ece_assunto": {
+      "valor": 0.036363312426217174,
+      "ic95": [
+        0.027997414284037056,
+        0.06082583318636488
+      ],
+      "n": 1650
+    }
+  },
+  "criticidade_confusao": {
+    "linhas_rotulo_colunas_predicao": [
+      "normal",
+      "importante",
+      "grave",
+      "BACEN"
+    ],
+    "matriz": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "meta": {
+    "quando": "2026-10-31T10:17:23+00:00",
+    "comando": ".venv/bin/callsim-baseline --test data/consumerbr/test.jsonl --treino data/splits",
+    "git": {
+      "commit": null,
+      "alteracoes_nao_commitadas": true
+    },
+    "uv_lock_sha256": "6e3e07bbbc353ae208ca9d6934b24ef311bcd6101e5ec4955bf1397036d24b02",
+    "versoes": {
+      "python": "3.12.14",
+      "laya": "0.4.17",
+      "torch": "2.15.0",
+      "transformers": "5.22.0",
+      "scikit-learn": "1.9.1",
+      "httpx": "0.28.1"
+    },
+    "plataforma": "Darwin 25.6.0 arm64",
+    "arquivos_sha256": {
+      "test": "4c54c46e3d02e0c56ec43a37ea36d39dfea15dbabeaeb33c39deff3770eaa513",
+      "train": "bae7299b862aefd51e3f1decf75be652d4e05bec4f68aa99feabd3e03ca88ef8",
+      "calib": "f4e5ba3ba94d56be288144a004f5f0e9e9c4184c45664673b2c608c75dd362e0"
+    },
+    "modelo": "tfidf-logreg",
+    "n_treino": 702,
+    "ms_por_conversa": 1.3164817423305728
+  }
+}

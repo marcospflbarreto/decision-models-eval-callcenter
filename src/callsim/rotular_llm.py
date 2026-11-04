@@ -95,7 +95,7 @@ async def run(args: argparse.Namespace) -> None:
         texto = r["transcricao"].removeprefix("Cliente: ")
         for tentativa in range(3):
             try:
-                out, _ = await client.json_chat(build_prompt(tax, texto), temperature=0, max_tokens=600)
+                out, _ = await client.json_chat(build_prompt(tax, texto), temperature=0, max_tokens=args.max_tokens)
                 doc["itens"][r["item"]] = valida(tax, out)
                 break
             except Exception as e:  # noqa: BLE001 - JSON ou rótulo inválido: tenta de novo
@@ -118,6 +118,7 @@ def main() -> None:
     p.add_argument("--amostra", default="data/consumerbr/auditoria/amostra.jsonl")
     p.add_argument("--taxonomia", default="data/consumerbr/auditoria/taxonomia.json")
     p.add_argument("--out", default="data/consumerbr/auditoria/export_llm")
+    p.add_argument("--max-tokens", type=int, default=600, help="aumente em modelos que raciocinam antes de responder")
     p.add_argument("--limite", type=int, default=None, help="só os N primeiros itens (teste)")
     asyncio.run(run(p.parse_args()))
 

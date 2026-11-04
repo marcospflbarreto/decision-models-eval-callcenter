@@ -106,16 +106,21 @@ def main() -> None:
             print(f"  {pa[:8]}… x {pb[:8]}… n={len(comuns)}: kappa assunto {ka:.2f}, sub {ks:.2f}, "
                   f"criticidade (ponderado) {kc:.2f}, BACEN {kb:.2f}")
 
-    # Consenso: maioria por campo; empate fica com o primeiro anotador (com 2, só entra o que concordam).
-    gold = []
+    # Consenso: maioria por campo; empate fica sem rótulo e vai para a adjudicação humana.
+    gold, pendentes = [], []
     for item, base in amostra.items():
         rs = [v[item] for v in anot.values() if item in v]
         if not rs:
             continue
         def maioria(campo):
             c = collections.Counter(r[campo] for r in rs).most_common()
-            return c[0][0] if len(rs) != 2 or c[0][1] == 2 else None
+            return c[0][0] if len(c) == 1 or c[0][1] > c[1][1] else None
         assunto, sub, crit, bacen = maioria("assunto"), maioria("sub"), maioria("crit"), maioria("bacen")
+        if None in (assunto, sub, crit, bacen):
+            pendentes.append({"item": item, "id": base["id"], "transcricao": base["transcricao"],
+                              "empates": [c for c, v in zip(("assunto", "sub", "crit", "bacen"),
+                                                            (assunto, sub, crit, bacen)) if v is None],
+                              "respostas": {p: v[item] for p, v in anot.items() if item in v}})
         if assunto in (None, "fora"):
             continue
         gold.append({
@@ -128,7 +133,12 @@ def main() -> None:
     with open(args.out, "w", encoding="utf-8") as fh:
         for g in gold:
             fh.write(json.dumps(g, ensure_ascii=False) + "\n")
-    print(f"\n-> {args.out}: {len(gold)} reclamações com rótulo gold (fora da taxonomia e empates ficam de fora)")
+    print(f"\n-> {args.out}: {len(gold)} reclamações com rótulo gold (fora da taxonomia e empates no assunto ficam de fora)")
+    pend = Path(args.out).with_name(Path(args.out).stem + "_pendentes.jsonl")
+    with open(pend, "w", encoding="utf-8") as fh:
+        for r in pendentes:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    print(f"-> {pend}: {len(pendentes)} reclamações com empate para adjudicação humana")
 
 
 if __name__ == "__main__":

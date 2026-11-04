@@ -1,0 +1,180 @@
+{
+  "n": 177,
+  "bacen_n": 17,
+  "limiar_bacen": 0.5,
+  "metricas": {
+    "assunto": {
+      "valor": 0.8531073446327684,
+      "ic95": [
+        0.7934700018634497,
+        0.89774317909158
+      ],
+      "k": 151,
+      "n": 177
+    },
+    "sub_assunto_2_passos": {
+      "valor": 0.7162162162162162,
+      "ic95": [
+        0.6388296062454186,
+        0.7826626561252692
+      ],
+      "k": 106,
+      "n": 148
+    },
+    "sub_assunto_macro_f1": {
+      "valor": 0.6909176529866184,
+      "ic95": [
+        0.5844457201201623,
+        0.7754840503028909
+      ],
+      "n": 148
+    },
+    "criticidade_exata": {
+      "valor": 0.2647058823529412,
+      "ic95": [
+        0.2041176418671824,
+        0.33569293874630246
+      ],
+      "k": 45,
+      "n": 170
+    },
+    "criticidade_macro_f1": {
+      "valor": 0.2777670164481188,
+      "ic95": [
+        0.19245978964589616,
+        0.3591598043700847
+      ],
+      "n": 170
+    },
+    "criticidade_mais_menos_1": {
+      "valor": 0.7647058823529411,
+      "ic95": [
+        0.6955301514234027,
+        0.8221829453864267
+      ],
+      "k": 130,
+      "n": 170
+    },
+    "criticidade_subestimada": {
+      "valor": 0.6823529411764706,
+      "ic95": [
+        0.6089994541492108,
+        0.7476473458753385
+      ],
+      "k": 116,
+      "n": 170
+    },
+    "grave_ou_bacen_recall": {
+      "valor": 0.3333333333333333,
+      "ic95": [
+        0.23708220863575521,
+        0.4458257388585134
+      ],
+      "k": 25,
+      "n": 75
+    },
+    "bacen_recall": {
+      "valor": 0.17647058823529413,
+      "ic95": [
+        0.06191126637620997,
+        0.41029458568834126
+      ],
+      "k": 3,
+      "n": 17
+    },
+    "bacen_precisao": {
+      "valor": 0.75,
+      "ic95": [
+        0.30064184258240184,
+        0.9544127391902995
+      ],
+      "k": 3,
+      "n": 4
+    },
+    "bacen_recall_so_noul": {
+      "valor": 0.058823529411764705,
+      "ic95": [
+        0.010460400984997592,
+        0.26982030637575405
+      ],
+      "k": 1,
+      "n": 17
+    },
+    "ece_assunto": {
+      "valor": 0.18731879730720644,
+      "ic95": [
+        0.14614016365204546,
+        0.23553764617762615
+      ],
+      "n": 177
+    },
+    "ece_criticidade": {
+      "valor": 0.2555034147695078,
+      "ic95": [
+        0.19105329963153497,
+        0.3219735525000634
+      ],
+      "n": 170
+    }
+  },
+  "criticidade_confusao": {
+    "linhas_rotulo_colunas_predicao": [
+      "normal",
+      "importante",
+      "grave",
+      "BACEN"
+    ],
+    "matriz": [
+      [
+        13,
+        0,
+        0,
+        0
+      ],
+      [
+        62,
+        11,
+        8,
+        1
+      ],
+      [
+        29,
+        11,
+        18,
+        0
+      ],
+      [
+        10,
+        0,
+        4,
+        3
+      ]
+    ]
+  },
+  "meta": {
+    "quando": "2026-11-04T12:06:09+00:00",
+    "comando": ".venv/bin/callsim-baseline --test data/consumerbr/auditoria/gold_llm.jsonl --treino data/splits",
+    "git": {
+      "commit": "1c375fe336f633b51c2630d1eed648a6bba0ad72",
+      "alteracoes_nao_commitadas": true
+    },
+    "uv_lock_sha256": "6e3e07bbbc353ae208ca9d6934b24ef311bcd6101e5ec4955bf1397036d24b02",
+    "versoes": {
+      "python": "3.12.14",
+      "laya": "0.4.17",
+      "torch": "2.15.0",
+      "transformers": "5.22.0",
+      "scikit-learn": "1.9.1",
+      "httpx": "0.28.1"
+    },
+    "plataforma": "Darwin 25.6.0 arm64",
+    "arquivos_sha256": {
+      "test": "b8604ce08646ba57cfe14e120013cc41187d0c87b6345fb65fcfd06fbe34a507",
+      "train": "bae7299b862aefd51e3f1decf75be652d4e05bec4f68aa99feabd3e03ca88ef8",
+      "calib": "f4e5ba3ba94d56be288144a004f5f0e9e9c4184c45664673b2c608c75dd362e0"
+    },
+    "modelo": "tfidf-logreg",
+    "n_treino": 702,
+    "ms_por_conversa": 1.5124270226641974
+  }
+}

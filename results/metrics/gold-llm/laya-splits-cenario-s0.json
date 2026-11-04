@@ -1,0 +1,206 @@
+{
+  "n": 177,
+  "bacen_n": 17,
+  "limiar_bacen": 0.5,
+  "metricas": {
+    "assunto": {
+      "valor": 0.8135593220338984,
+      "ic95": [
+        0.7497463698840026,
+        0.8640509348040639
+      ],
+      "k": 144,
+      "n": 177
+    },
+    "sub_assunto_2_passos": {
+      "valor": 0.6418918918918919,
+      "ic95": [
+        0.5619587362651568,
+        0.714645560915607
+      ],
+      "k": 95,
+      "n": 148
+    },
+    "sub_assunto_macro_f1": {
+      "valor": 0.5501414532352923,
+      "ic95": [
+        0.45624561249561246,
+        0.6325156503864944
+      ],
+      "n": 148
+    },
+    "criticidade_exata": {
+      "valor": 0.27647058823529413,
+      "ic95": [
+        0.2147417468056797,
+        0.348078304777131
+      ],
+      "k": 47,
+      "n": 170
+    },
+    "criticidade_macro_f1": {
+      "valor": 0.28098522167487683,
+      "ic95": [
+        0.20658600248439393,
+        0.3502370863599677
+      ],
+      "n": 170
+    },
+    "criticidade_mais_menos_1": {
+      "valor": 0.8529411764705882,
+      "ic95": [
+        0.7919201765841425,
+        0.8983639524956301
+      ],
+      "k": 145,
+      "n": 170
+    },
+    "criticidade_subestimada": {
+      "valor": 0.5176470588235295,
+      "ic95": [
+        0.44297627496740566,
+        0.5915379314865831
+      ],
+      "k": 88,
+      "n": 170
+    },
+    "grave_ou_bacen_recall": {
+      "valor": 0.5333333333333333,
+      "ic95": [
+        0.42157537389084965,
+        0.6418430366102965
+      ],
+      "k": 40,
+      "n": 75
+    },
+    "bacen_recall": {
+      "valor": 0.4117647058823529,
+      "ic95": [
+        0.2161105679021481,
+        0.6399455735700021
+      ],
+      "k": 7,
+      "n": 17
+    },
+    "bacen_precisao": {
+      "valor": 0.25925925925925924,
+      "ic95": [
+        0.1317037456190719,
+        0.44678571314553067
+      ],
+      "k": 7,
+      "n": 27
+    },
+    "bacen_recall_so_noul": {
+      "valor": 0.17647058823529413,
+      "ic95": [
+        0.06191126637620997,
+        0.41029458568834126
+      ],
+      "k": 3,
+      "n": 17
+    },
+    "ece_assunto": {
+      "valor": 0.1437734463276836,
+      "ic95": [
+        0.09981977401129945,
+        0.20337683615819208
+      ],
+      "n": 177
+    },
+    "ece_criticidade": {
+      "valor": 0.4828923529411765,
+      "ic95": [
+        0.41520411764705883,
+        0.5603570588235294
+      ],
+      "n": 170
+    }
+  },
+  "criticidade_confusao": {
+    "linhas_rotulo_colunas_predicao": [
+      "normal",
+      "importante",
+      "grave",
+      "BACEN"
+    ],
+    "matriz": [
+      [
+        9,
+        2,
+        0,
+        2
+      ],
+      [
+        48,
+        11,
+        16,
+        7
+      ],
+      [
+        10,
+        19,
+        21,
+        8
+      ],
+      [
+        4,
+        2,
+        5,
+        6
+      ]
+    ]
+  },
+  "meta": {
+    "quando": "2026-11-04T12:05:44+00:00",
+    "comando": ".venv/bin/callsim-laya-eval --model models/laya-callcenter-v1 --model models/laya-splits-cenario-s0 --model models/laya-splits-cenario-s1 --model models/laya-splits-cenario-s2 --test data/consumerbr/auditoria/gold_llm.jsonl",
+    "git": {
+      "commit": "1c375fe336f633b51c2630d1eed648a6bba0ad72",
+      "alteracoes_nao_commitadas": true
+    },
+    "uv_lock_sha256": "6e3e07bbbc353ae208ca9d6934b24ef311bcd6101e5ec4955bf1397036d24b02",
+    "versoes": {
+      "python": "3.12.14",
+      "laya": "0.4.17",
+      "torch": "2.15.0",
+      "transformers": "5.22.0",
+      "scikit-learn": "1.9.1",
+      "httpx": "0.28.1"
+    },
+    "plataforma": "Darwin 25.6.0 arm64",
+    "arquivos_sha256": {
+      "test": "b8604ce08646ba57cfe14e120013cc41187d0c87b6345fb65fcfd06fbe34a507",
+      "taxonomia": "a35631ee16f9b5c203fccdf6aed179c3edc394e795fd4d25504a3e5e1f069260"
+    },
+    "modelo": "models/laya-splits-cenario-s0",
+    "device": "mps",
+    "ms_por_conversa": 30.862978107337366,
+    "treino": {
+      "quando": "2026-10-30T19:50:48+00:00",
+      "comando": "-c",
+      "git": {
+        "commit": null,
+        "alteracoes_nao_commitadas": true
+      },
+      "uv_lock_sha256": "6e3e07bbbc353ae208ca9d6934b24ef311bcd6101e5ec4955bf1397036d24b02",
+      "versoes": {
+        "python": "3.12.14",
+        "laya": "0.4.17",
+        "torch": "2.15.0",
+        "transformers": "5.22.0",
+        "scikit-learn": "1.9.1",
+        "httpx": "0.28.1"
+      },
+      "plataforma": "Darwin 25.6.0 arm64",
+      "arquivos_sha256": {
+        "train": "0548514749786e82e865035d853ef9b50ceaae715faedc690603f43d9d889d9e"
+      },
+      "seed": 0,
+      "base": "convaiinnovations/laya-multilingual",
+      "epochs": 4,
+      "micro_batch": 8,
+      "grad_accum": 4,
+      "device": "mps"
+    }
+  }
+}

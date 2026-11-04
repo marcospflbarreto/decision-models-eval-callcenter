@@ -1,0 +1,16 @@
+
+1650 conversas de teste (0 BACEN; com sub-assunto: 1350). Seed única: valor [IC 95%]. Várias seeds: média ± desvio entre seeds [menor IC inf., maior IC sup.].
+
+métrica                               laya-callcenter-v1           tfidf-logreg-splits        laya-splits-cenario-s★
+assunto                                   68% [66%, 70%]                67% [65%, 69%]             68%±2% [63%, 72%]
+sub_assunto_2_passos                      48% [46%, 51%]                48% [46%, 51%]             44%±1% [40%, 47%]
+sub_assunto_macro_f1                      48% [45%, 50%]                48% [46%, 51%]             43%±2% [38%, 47%]
+ece_assunto                               24% [22%, 26%]                   4% [3%, 6%]             24%±2% [20%, 29%]
+
+McNemar exato, laya-callcenter-v1 vs tfidf-logreg-splits (1 par(es) de execuções; p com correção de Holm entre métricas):
+  assunto                  diferença +1% (IC 95% do 1º par [-2%, +3%])  p_holm 1  discordantes 180/169
+  sub_assunto_2_passos     diferença +0% (IC 95% do 1º par [-3%, +3%])  p_holm 1  discordantes 184/183
+
+McNemar exato, laya-callcenter-v1 vs laya-splits-cenario-s★ (3 par(es) de execuções; p com correção de Holm entre métricas):
+  assunto                  diferença -0% (IC 95% do 1º par [-3%, -0%])  p_holm máx 0.115  discordantes 59/90
+  sub_assunto_2_passos     diferença +4% (IC 95% do 1º par [+2%, +6%])  p_holm máx 0.00159  discordantes 125/75

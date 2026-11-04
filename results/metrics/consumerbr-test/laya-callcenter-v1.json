@@ -1,0 +1,101 @@
+{
+  "n": 1650,
+  "bacen_n": 0,
+  "limiar_bacen": 0.5,
+  "metricas": {
+    "assunto": {
+      "valor": 0.6781818181818182,
+      "ic95": [
+        0.6552487509661621,
+        0.7002871420687639
+      ],
+      "k": 1119,
+      "n": 1650
+    },
+    "sub_assunto_2_passos": {
+      "valor": 0.482962962962963,
+      "ic95": [
+        0.4563928620503756,
+        0.5096297473915973
+      ],
+      "k": 652,
+      "n": 1350
+    },
+    "sub_assunto_macro_f1": {
+      "valor": 0.4752843311037481,
+      "ic95": [
+        0.4505466205020185,
+        0.49839972254367026
+      ],
+      "n": 1350
+    },
+    "ece_assunto": {
+      "valor": 0.2401454545454545,
+      "ic95": [
+        0.21918842424242424,
+        0.2616383030303031
+      ],
+      "n": 1650
+    }
+  },
+  "criticidade_confusao": {
+    "linhas_rotulo_colunas_predicao": [
+      "normal",
+      "importante",
+      "grave",
+      "BACEN"
+    ],
+    "matriz": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "meta": {
+    "quando": "2026-10-31T10:18:21+00:00",
+    "comando": ".venv/bin/callsim-laya-eval --test data/consumerbr/test.jsonl --model models/laya-callcenter-v1 --model models/laya-splits-cenario-s0 --model models/laya-splits-cenario-s1 --model models/laya-splits-cenario-s2 --model convaiinnovations/laya-multilingual",
+    "git": {
+      "commit": null,
+      "alteracoes_nao_commitadas": true
+    },
+    "uv_lock_sha256": "6e3e07bbbc353ae208ca9d6934b24ef311bcd6101e5ec4955bf1397036d24b02",
+    "versoes": {
+      "python": "3.12.14",
+      "laya": "0.4.17",
+      "torch": "2.15.0",
+      "transformers": "5.22.0",
+      "scikit-learn": "1.9.1",
+      "httpx": "0.28.1"
+    },
+    "plataforma": "Darwin 25.6.0 arm64",
+    "arquivos_sha256": {
+      "test": "4c54c46e3d02e0c56ec43a37ea36d39dfea15dbabeaeb33c39deff3770eaa513",
+      "taxonomia": "a35631ee16f9b5c203fccdf6aed179c3edc394e795fd4d25504a3e5e1f069260"
+    },
+    "modelo": "models/laya-callcenter-v1",
+    "device": "mps",
+    "ms_por_conversa": 29.401280328518514,
+    "treino": null
+  }
+}
